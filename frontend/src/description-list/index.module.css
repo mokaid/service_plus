@@ -1,0 +1,22 @@
+.container {
+  display: flex;
+  flex-flow: column nowrap;
+  gap: 0.5rem;
+}
+
+.item {
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.5rem 0;
+}
+
+.label {
+  flex: 0 0 auto;
+}
+
+.value {
+  flex: 1 1 auto;
+  text-align: end;
+}

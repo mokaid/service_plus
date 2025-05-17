@@ -1,0 +1,30 @@
+.container {
+  display: flex;
+  flex-flow: column nowrap;
+  gap: 1rem;
+
+}
+
+.ant_input, .css-dev-only-do-not-override-13exor3{
+  background-color: transparent !important;
+}
+
+
+
+.testingTextarea > textarea {
+  background-color: #0C183B !important;
+}
+/* .ant-radio .ant-radio-input .ant-radio-inner */
+.ant_radio_group .ant-radio-wrapper .ant-radio-inner {
+background: red !important;
+}
+.switch{
+  /* marginTop:"1rem",display:"flex",justifyContent:"space-between */
+  margin: 1.3rem 0rem;
+  display: flex;
+  justify-content: space-between;
+}
+
+
+
+

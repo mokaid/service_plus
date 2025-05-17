@@ -1,0 +1,16 @@
+.default_btn{
+    background: rgba(12, 24, 59, 1) !important;
+    border: 1px solid rgba(27, 54, 135, 1);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0px 7px;
+}
+.primary_btn{
+    background:rgba(24, 144, 255, 1) !important;
+    border: 1px solid rgba(27, 54, 135, 1);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0px 7px;
+}

@@ -1,0 +1,16 @@
+.header {
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.meratable .ant-spin-container div{
+  background: red !important;
+}
+.ant-table .ant-table-ping-right .ant-table-fixed-column .ant-table-scroll-horizontal .ant-table-has-fix-right{
+  background: red !important;
+}
+
+/* ant-table ant-table-ping-right ant-table-fixed-column ant-table-scroll-horizontal ant-table-has-fix-right */

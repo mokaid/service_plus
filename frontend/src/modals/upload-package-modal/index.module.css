@@ -1,0 +1,46 @@
+.container {
+  display: flex;
+  flex-flow: column nowrap;
+  gap: 1rem;
+
+}
+
+.ant_input, .css-dev-only-do-not-override-13exor3{
+  background-color: transparent !important;
+}
+
+
+
+.testingTextarea > textarea {
+  background-color: #0C183B !important;
+}
+/* .ant-radio .ant-radio-input .ant-radio-inner */
+.ant_radio_group .ant-radio-wrapper .ant-radio-inner {
+background: red !important;
+}
+
+.input_bg {
+  background-color: #0C183B !important;
+  border-radius: 2px !important;
+}
+
+.default_btn{
+background: transparent;
+border-radius: 1px;
+border-color: #1B3687;
+}
+
+.btn_container{
+/* display: "flex", justifyContent: "space-between",gap:"0.5rem" */
+display: flex;
+justify-content: space-between;
+gap: 0.5rem;
+}
+.title{
+font-size: 20px !important;
+}
+
+
+.testingTextarea > textarea {
+background-color: #0C183B !important;
+}

@@ -1,0 +1,27 @@
+ .input_bg {
+   background-color: #0C183B !important;
+   border-radius: 50px !important;
+   border-color: #1B3687
+ }
+
+ .default_btn {
+   background: transparent;
+   border-radius: 1px;
+   border-color: #1B3687;
+ }
+
+ .btn_container {
+   /* display: "flex", justifyContent: "space-between",gap:"0.5rem" */
+   display: flex;
+   justify-content: space-between;
+   gap: 0.5rem;
+ }
+
+ .title {
+   font-size: 20px !important;
+ }
+
+
+ .testingTextarea>textarea {
+   background-color: #0C183B !important;
+ }

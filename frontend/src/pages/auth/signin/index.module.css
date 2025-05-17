@@ -1,0 +1,81 @@
+.container {
+  /* width:"100%", border:"1px solid white",minHeight:"100vh",backgroundColor:"rgba(5, 10, 25, 1)" */
+  width: 100%;
+  min-height: 100vh;
+  background-color: rgba(5, 10, 25, 1);
+  position: relative;
+}
+.login_card_container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+.login_card {
+  width: 400px;
+  border-radius: 16px;
+  background: rgba(27, 36, 56, 1);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 2;
+}
+.logo {
+  height: 32px;
+  width: 166px;
+  margin-bottom: 24px;
+}
+.img {
+  /* width:"150px",height:"158px" */
+  height: 158px;
+  width: 150px;
+  margin-bottom: 24px;
+}
+
+.input_bg {
+  background-color: rgba(27, 36, 56, 1) !important;
+  border-radius: 2px !important;
+  border: 1px solid rgba(100, 103, 113, 1);
+  margin-bottom: 24px;
+}
+.input_bg > input {
+  background-color: transparent !important;
+}
+.primary_btn {
+  border-radius: 2px !important;
+  width: 100%;
+}
+
+.input_container {
+  width: 100%;
+}
+.bg_img {
+  z-index: 1;
+  position: absolute;
+  width: 60%;
+  height: 100%;
+  background-image: url("../../../assets/signinbg.png");
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.puzzle_overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.puzzle_container {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}

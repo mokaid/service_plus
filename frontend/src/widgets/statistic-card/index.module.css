@@ -1,0 +1,27 @@
+.darkBg{
+  background-color: #1B2438 !important;
+}
+
+.lightBg{
+  background-color: #FFF !important;
+  box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+}
+
+.titleContainer {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+}
+
+.title {
+  max-width: 100px !important;
+  font-size: 25px !important;
+  font-weight: bold !important;
+}
+.value {
+  flex-shrink: 0;
+}
+
+.smaller .title {
+  font-size: 15px !important;
+}

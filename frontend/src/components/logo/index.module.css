@@ -1,0 +1,17 @@
+.container {
+  position: relative;
+  overflow: hidden;
+}
+
+:global(#service-plus-logo-text) {
+  opacity: 1;
+  transform: translateX(0);
+  transition-property: transform, opacity;
+  transition-duration: 0.2s;
+  transition-timing-function: ease;
+}
+
+.collapsed :global(#service-plus-logo-text) {
+  transform: translateX(-100%);
+  opacity: 0;
+}

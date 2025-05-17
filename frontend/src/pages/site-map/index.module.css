@@ -1,0 +1,18 @@
+
+
+          .trigger{
+            position: absolute;
+            transition-duration: 0.3s;
+            top: 50%;
+            transform: rotate(180deg);
+            cursor: pointer;
+        }
+
+        .trigger_expand{
+            right:640px;
+            cursor: pointer;
+        }
+        .trigger_collapse{
+            right:0px;
+            cursor: pointer;
+        }

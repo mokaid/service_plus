@@ -1,0 +1,36 @@
+.container {
+  position: relative;
+  display: flex;
+  flex-flow: column nowrap;
+  gap: 0.5rem;
+  padding: 1rem;
+  height: 100%;
+}
+
+.header {
+  display: flex;
+  flex-flow: row nowrap;
+  gap: 0.5rem;
+  align-items: center;
+  justify-content: space-between;
+  flex: 0 1 auto;
+}
+
+.title {
+  display: flex;
+  align-items: center;
+}
+
+.tooltipIcon {
+  font-size: 1rem;
+  margin-inline-start: 0.25rem;
+  cursor: help;
+}
+
+.content {
+  display: flex;
+  flex-flow: column nowrap;
+  align-content: flex-start;
+  height: 100%;
+  overflow-y: auto;
+}

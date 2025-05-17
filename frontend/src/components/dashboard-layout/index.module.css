@@ -1,0 +1,98 @@
+.container {
+  min-width: var(--layout-min-width);
+  min-height: 100vh;
+}
+
+.header {
+  position: sticky;
+  top: 0;
+  display: flex;
+  align-items: center;
+  padding: 0 1.5rem;
+  width: 100%;
+  z-index: 2;
+ 
+}
+.header_darkBg{
+  background: #1B2438 !important;
+}
+.header_lightBg{
+  background: white !important;
+  box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+  
+  
+}
+.controls {
+  margin-inline-start: auto;
+}
+
+.content {
+  padding: 1.5rem;
+  overflow: initial;
+  background: #060b19 !important;
+}
+
+.light_content {
+  padding: 1.5rem;
+  overflow: initial;
+  background: white !important;
+}
+
+.logo {
+  height: 2rem;
+  width: 10.125rem;
+  margin: 1rem;
+  transform: translateX(0);
+  transition: transform 0.3s;
+}
+
+.userPanel {
+  margin-inline-start: 1rem;
+}
+
+:global(.ant-layout-sider-collapsed) .logo {
+  transform: translateX(0.5rem);
+}
+
+.trigger {
+  position: absolute;
+  top: 50vh;
+  left: 100%;
+  transform: translateY(-50%);
+  /* background: #060b19 !important; */
+}
+
+.sider {
+  position: fixed !important;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  height: 100vh;
+  overflow: visible;
+  z-index: 100;
+  
+ 
+ 
+}
+.sider_bg{
+  background: #1b2438 !important;
+}
+.sider_light{
+  box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+}
+.menu_bg {
+  background: #1b2438 !important;
+}
+/* .menu_bg > .ant-menu-item-selected{
+background: black !important;
+} */
+.ant-menu .ant-menu-item-selected{
+  background: black !important;
+}
+
+.fakeSider {
+  visibility: hidden;
+  z-index: -1;
+  pointer-events: none;
+  
+}

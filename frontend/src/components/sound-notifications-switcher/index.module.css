@@ -1,0 +1,15 @@
+.container {
+  position: relative;
+}
+
+.disabled::before {
+  content: "";
+  position: absolute;
+  top: auto;
+  left: auto;
+  width: 2px;
+  height: 20px;
+  background-color: currentcolor;
+  transform: rotate(135deg);
+  transform-origin: center;
+}
