@@ -1,5 +1,5 @@
 import { Spin, Table } from "antd";
-import { type FC, useCallback, useEffect, useState } from "react";
+import { type FC, useCallback, useEffect, useMemo, useState } from "react";
 
 import { useAppDispatch } from "@/hooks/use-app-dispatch";
 import {
@@ -9,9 +9,8 @@ import {
 
 import { useAppSelector } from "@/hooks/use-app-selector";
 import { SiteInfo } from "@/modals/site-info-modal";
-import { useGetSitesQuery } from "@/services";
+import { useGetBoxPropertyMutation, useGetSitesQuery } from "@/services";
 import { getSelectedRowIds } from "@/store/selectors/events";
-import { setSiteObject, sites } from "@/store/slices/sites";
 import { OrganisationSite } from "@/types/organisation";
 import { LoadingOutlined } from "@ant-design/icons";
 import { generateColumns } from "./config";
@@ -40,20 +39,24 @@ export const DisconnectedSitesTable: FC<Props> = ({
     pageSize,
   });
 
+  const [getBoxProperty, { data: siteInfo }] = useGetBoxPropertyMutation();
+
   useEffect(() => {
     const interval = setInterval(refetch, 10000);
 
-    if (disconnectedSites.length !== (currentData || []).length) {
-      // if (disconnectedSites.length < (currentData || []).length) {
-      // }
-      setDisconnectedSites(currentData);
-      setTotalItems(currentData.length);
-    }
+    // if (disconnectedSites.length !== (currentData || []).length) {
+    // if (disconnectedSites.length < (currentData || []).length) {
+    //   const audio = new Audio(warningAudio);
+    //   audio.play();
+    // }
+    setDisconnectedSites(currentData);
+    setTotalItems(currentData?.length);
+    // }
 
     return () => {
       clearInterval(interval);
     };
-  }, [currentData]);
+  }, [currentData, refetch]);
 
   const dispatch = useAppDispatch();
   const rowKey = useAppSelector(getSelectedRowIds);
@@ -65,7 +68,9 @@ export const DisconnectedSitesTable: FC<Props> = ({
 
   const handleProcessAlarm = useCallback(
     (record: OrganisationSite) => {
-      dispatch(setSiteObject(record));
+      getBoxProperty({
+        siteId: record?.id,
+      });
       dispatch(setShowSiteInfoModal(true));
     },
     [dispatch],
@@ -87,25 +92,34 @@ export const DisconnectedSitesTable: FC<Props> = ({
 
   const antIcon = <LoadingOutlined style={{ fontSize: 24 }} spin />;
 
+  const data = useMemo(() => {
+    let array = [];
+    if (disconnectedSites) {
+      array = disconnectedSites.filter(
+        (site: any) => site.connectionState == false,
+      );
+    } else {
+      array = currentData?.filter((site: any) => site.connectionState == false);
+    }
+    setTotalItems(array?.length);
+    return array;
+  }, [disconnectedSites, currentData]);
+
   return (
     <>
       <Table
-        rowKey="eventId"
+        rowKey="id"
         className={className}
         scroll={{ x: 1200 }}
         // dataSource={event.find((item) => item.pageIndex === pageIndex)?.data}
-        dataSource={
-          disconnectedSites
-            ? disconnectedSites.filter((site: any) => site.connectionState == false)
-            : currentData.filter((site: any) => site.connectionState == false)
-        }
+        dataSource={data}
         // headerBg={"#0000FF"}
         sticky={true}
         columns={columns}
         showSorterTooltip={false}
         loading={{
           indicator: <Spin indicator={antIcon} />,
-          spinning: loading || siteLoading,
+          spinning: isLoading || siteLoading,
         }}
         pagination={{
           current: pageIndex,
@@ -118,7 +132,7 @@ export const DisconnectedSitesTable: FC<Props> = ({
         data-testid={dataTestId}
       />
 
-      <SiteInfo refetch={refetch} />
+      <SiteInfo refetch={refetch} sitesData={siteInfo} />
     </>
   );
 };

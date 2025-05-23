@@ -1,4 +1,4 @@
-import circleMarker from "@/assets/orangemarker.svg";
+import circleMarker from "@/assets/circleMarker.svg";
 import { GoogleMapControl } from "@/components/google-map-control";
 import { GOOGLE_MAP_API_KEY } from "@/const/google-maps";
 import { useGetEventTopDataMutation, useQueryEventsMutation } from "@/services";
@@ -11,7 +11,6 @@ import { OrganisationSite } from "@/types/organisation";
 import { formatDate, getLastWeekDate } from "@/utils/general-helpers";
 import { AimOutlined } from "@ant-design/icons";
 import { GoogleMap, Marker, useJsApiLoader } from "@react-google-maps/api";
-import { Input } from "antd";
 import ErrorBoundary from "antd/es/alert/ErrorBoundary";
 import clsx from "clsx";
 import { useCallback, useEffect, useState, type FC } from "react";
@@ -62,8 +61,6 @@ export const SiteMapComp: FC<Props> = ({ className, dataTestId, sites }) => {
   const [getChartTop10Events] = useGetEventTopDataMutation();
 
   const [getEvents, { data: events }] = useQueryEventsMutation();
-
-  console.log(events, "events on site map");
 
   const getTop10WeeklyAlertsBySite = async () => {
     try {
@@ -167,19 +164,23 @@ export const SiteMapComp: FC<Props> = ({ className, dataTestId, sites }) => {
             onLoad={handleMapLoad}
             onUnmount={handleMapUnmount}
           >
-            {filteredAlertData?.map((data) => {
+            {filteredAlertData?.map((data: any) => {
               return (
                 <Marker
-                  key={data?.site?.id}
+                  key={data?.eventId}
                   position={{
                     lat: data?.site?.latitude,
                     lng: data?.site?.longitude,
                   }}
                   onClick={() => handleNavigate(data?.site?.id)}
                   options={{
-                    icon: (window.google.maps as any).Icon,
+                    icon: circleMarker,
+                    label: {
+                      text: String(data?.site?.count),
+                      fontSize: "12px",
+                      color: "white",
+                    },
                   }}
-                  icon={circleMarker}
                   label={String(data?.site?.count)}
                 />
               );

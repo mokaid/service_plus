@@ -10,7 +10,6 @@ import {
   Row,
   Select,
   Skeleton,
-  Switch,
   Table,
   TableColumnsType,
   Tag,
@@ -18,10 +17,8 @@ import {
   TimePickerProps,
   Transfer,
   TransferProps,
-  Typography,
 } from "antd";
 import { TableRowSelection } from "antd/es/table/interface";
-import { TransferItem } from "antd/es/transfer";
 import dayjs from "dayjs";
 import { useContext, useState } from "react";
 import styles from "./index.module.css";
@@ -31,13 +28,29 @@ interface DataType {
   name: string;
 }
 
+interface PackageType {
+  fileName: string;
+  version: string;
+  boxType: number;
+}
+
 interface Props {
-  packages: any[];
+  packages: PackageType[];
   className: string;
 }
+
+type TableTransferProps = TransferProps<DataType> & {
+  dataSource: DataType[];
+  leftColumns: TableColumnsType<DataType>;
+  rightColumns: TableColumnsType<DataType>;
+  disabled: boolean;
+};
+
 export const SiteUpgradeTable = ({ packages, className }: Props) => {
   const { currentData, isLoading } = useGetSitesQuery({});
-  const [targetKeys, setTargetKeys] = useState<TransferProps<any>["targetKeys"]>([]);
+  const [targetKeys, setTargetKeys] = useState<
+    TransferProps<DataType>["targetKeys"]
+  >([]);
   const [upgradeBox, { isLoading: isUpgrading }] = useUpgradeBoxMutation();
   const [version, setVersion] = useState<string>("");
   const [boxType, setBoxType] = useState<number>(-1);
@@ -53,9 +66,9 @@ export const SiteUpgradeTable = ({ packages, className }: Props) => {
     setTargetKeys(nextTargetKeys);
   };
 
-  const onChoosePackage = (value: any) => {
+  const onChoosePackage = (value: string) => {
     const selectedPackage = packages.filter(
-      (item) => item.fileName == value,
+      (item: { fileName: string }) => item.fileName == value,
     )[0];
     setTargetKeys([]);
     setVersion(selectedPackage?.version);
@@ -89,7 +102,7 @@ export const SiteUpgradeTable = ({ packages, className }: Props) => {
 
   const filterOption = (input: string, item: DataType) =>
     item.id?.includes(input) || item.name?.includes(input);
-  const onsubmit = async (fromData: any) => {
+  const onsubmit = async (fromData: { package: string }) => {
     if (targetKeys && targetKeys.length > 0) {
       const data = {
         siteId: targetKeys,
@@ -98,10 +111,9 @@ export const SiteUpgradeTable = ({ packages, className }: Props) => {
         fwPackageCompressFormat: "zip",
         executeTime: time,
       };
-
       const res = await upgradeBox(data);
       if (res) {
-        if ('data' in res) {
+        if ("data" in res) {
           messageApi.open({
             type: "success",
             content: "Upgraded Successfully !",
@@ -155,14 +167,16 @@ export const SiteUpgradeTable = ({ packages, className }: Props) => {
                   onChange={onChoosePackage}
                   options={
                     packages
-                      ? packages.map((item) => ({
-                          label: `${item.fileName} (${
-                            item.boxType == 1
-                              ? "Lite Version"
-                              : "Standard Version"
-                          })`,
-                          value: item.fileName,
-                        }))
+                      ? packages.map(
+                          (item: { fileName: string; boxType: number }) => ({
+                            label: `${item.fileName} (${
+                              item.boxType == 1
+                                ? "Lite Version"
+                                : "Standard Version"
+                            })`,
+                            value: item.fileName,
+                          }),
+                        )
                       : []
                   }
                 />
@@ -178,7 +192,6 @@ export const SiteUpgradeTable = ({ packages, className }: Props) => {
                 <TimePicker
                   className={styles.input_bg}
                   onChange={onChangeTime}
-                  defaultOpenValue={dayjs("00:00:00", "HH:mm:ss")}
                 />
               </Form.Item>
               <Button type="primary" htmlType="submit" loading={isUpgrading}>
@@ -189,11 +202,14 @@ export const SiteUpgradeTable = ({ packages, className }: Props) => {
         </Col>
         <Col span={24}>
           <TableTransfer
-            className={className}
+            className={styles.transferStyles}
             rowKey={(record) => record.id}
             dataSource={
               boxType > -1
-                ? currentData.filter((item: any) => item.boxType == boxType)
+                ? currentData.filter(
+                    (item: DataType & { boxType: number }) =>
+                      item.boxType == boxType,
+                  )
                 : []
             }
             titles={[
@@ -206,10 +222,9 @@ export const SiteUpgradeTable = ({ packages, className }: Props) => {
             showSelectAll={false}
             disabled={isUpgrading}
             onChange={onChange}
-            filterOption={(input: string, item: TransferItem) => {
-              const dataItem = item as unknown as DataType;
-              return filterOption(input, dataItem);
-            }}
+            filterOption={(input: string, item: DataType) =>
+              filterOption(input, item)
+            }
             leftColumns={columns}
             rightColumns={columns}
           />
@@ -219,19 +234,10 @@ export const SiteUpgradeTable = ({ packages, className }: Props) => {
   );
 };
 
-interface TableTransferProps extends TransferProps<TransferItem> {
-  dataSource: DataType[];
-  leftColumns: TableColumnsType<DataType>;
-  rightColumns: TableColumnsType<DataType>;
-  disabled: boolean;
-}
-
 const TableTransfer: React.FC<TableTransferProps> = (props) => {
   const { leftColumns, disabled, rightColumns, ...restProps } = props;
-  const { appTheme } = useContext(ThemeContext);
-  const darkTheme = appTheme === "dark";
   return (
-    <Transfer
+    <Transfer<DataType>
       disabled={disabled}
       style={{
         width: "100%",
@@ -248,12 +254,11 @@ const TableTransfer: React.FC<TableTransferProps> = (props) => {
         disabled: listDisabled,
       }) => {
         const columns = direction === "left" ? leftColumns : rightColumns;
-        const rowSelection: TableRowSelection<TransferItem> = {
+        const rowSelection: TableRowSelection<DataType> = {
           getCheckboxProps: () => ({ disabled: listDisabled }),
           onChange(selectedRowKeys) {
             onItemSelectAll(selectedRowKeys.map(String), "replace");
           },
-
           selectedRowKeys: listSelectedKeys,
           selections: [
             Table.SELECTION_ALL,
@@ -261,13 +266,15 @@ const TableTransfer: React.FC<TableTransferProps> = (props) => {
             Table.SELECTION_NONE,
           ],
         };
-
         return (
           <Table<DataType>
-            className={darkTheme ? "alerts_table" : "alerts_table_light"}
-            rowSelection={rowSelection as unknown as TableRowSelection<DataType>}
+            className={styles.site_upgrade_table}
+            // className={darkTheme ? "alerts_table" : "alerts_table_light"}
+            rowSelection={
+              rowSelection as unknown as TableRowSelection<DataType>
+            }
             columns={columns}
-            dataSource={filteredItems as any}
+            dataSource={filteredItems}
             size="small"
             style={{
               pointerEvents: listDisabled ? "none" : undefined,

@@ -29,6 +29,12 @@ html {
   background-color: #0C183B !important;
 }
 
+
+.alerts_table > .ant-table-header .ant-table-sticky-holder {
+  overflow: visible !important;
+  top: none !important;
+}
+
 .alerts_table .ant-table-thead tr th {
   background: #232f49 !important;
 }
@@ -111,15 +117,37 @@ html {
   /* height: 1.1654rem;
   width: 1.1654rem; */
 }
+
+.ant-select-selector{
+  background-color: transparent !important;
+}
+
 .select_input .ant-select-selector {
   background-color: transparent !important;
   border: 1px solid #1b3687 !important;
+  border-radius: 2px !important;
 }
+
+.search_input .ant-input-group .ant-input,
+ .search_input .ant-input-group .ant-btn {
+  background-color: transparent important;
+}
+
+.alarm_select_input .ant-select-selector {
+  background-color: transparent !important;
+  border: transparent !important;
+  border-radius: 0px !important;
+}
+
+.alarm_select_input .ant-select-arrow {
+  color: #1b3687 !important;
+}
+
 .select_input .ant-select-arrow {
   color: #1b3687 !important;
 }
 .ant-select-dropdown {
-  background-color: #0c183b;
+  /* background-color: #0c183b; */
   color: white;
 }
 .date_input {
@@ -162,11 +190,27 @@ html {
   border-end-end-radius: 2px !important;
   border-start-end-radius: 2px !important;
 }
+
+
+.search_input .ant-input-affix-wrapper{
+  background-color: transparent !important;
+} 
+
+.components_input_bg__0uGQr{
+  background-color: transparent !important;
+}
+
+
+.search_input .ant-input-group .ant-input{
+  background-color: transparent !important;
+}
+
 .search_input_light .ant-input-affix-wrapper {
   /* background: #1b2438 !important; */
   border-start-start-radius: 2px !important;
   border-end-start-radius: 2px !important;
   height: 40px !important;
+
 }
 .search_input_light .ant-input-group .ant-input,
 .search_input_light .ant-input-group .ant-btn {
@@ -234,7 +278,7 @@ html {
   /* height: 40px !important; */
 }
 .filter_btn {
-  border-color: #1b3687;
+  /* border-color: #1b3687; */
   border-radius: 2px !important;
   height: 40px !important;
 }
@@ -306,6 +350,19 @@ html {
   align-items: center;
   height: 100%;
 }
+
+.upload-package-modal_input_bg__gVVWi{
+  background-color: transparent !important;
+}
+
+.user-modals_input_bg__GI-U- {
+  background-color: transparent !important;
+}
+
+.user-modals_input_bg__GI-U- input {
+  background-color: transparent !important;
+}
+
 .alert-map-header {
   border: 1px solid black;
   width: 100%;

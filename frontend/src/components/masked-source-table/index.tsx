@@ -32,17 +32,16 @@ export const MaskedSourceTable: FC<Props> = ({ className, dataTestId }) => {
   }, [pageSize, pageIndex]);
 
   const handleProcessAlarm = useCallback(
-    async (keyId: number) => {
-      
-      const response = await deleteMaskedItem({ keyId: keyId });
-      if ('data' in response && response.data.error == 0) {
+    async (data: any) => {
+      const response = await deleteMaskedItem(data);
+      if ("data" in response && response.data.error == 0) {
         messageApi.success("Recovery Successful");
-      } else if ('error' in response) {
+      } else if ("error" in response) {
         messageApi.error("There was an error");
       }
       await getMaskedItems({ pageSize, pageIndex });
     },
-    [dispatch, pageSize, pageIndex]
+    [dispatch, pageSize, pageIndex],
   );
 
   const handlePageChange = (page: number, size: number) => {
@@ -61,7 +60,7 @@ export const MaskedSourceTable: FC<Props> = ({ className, dataTestId }) => {
     <>
       {messageContext}
       <Table
-        rowKey="eventId"
+        rowKey="siteId"
         className={className}
         scroll={{ x: 1200 }}
         dataSource={data ? data?.data?.list : []}

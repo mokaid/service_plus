@@ -1,4 +1,3 @@
-import { useState, type FC, useContext, useEffect } from "react";
 import {
   Button,
   Drawer,
@@ -10,7 +9,7 @@ import {
   Typography,
   message,
 } from "antd";
-import { useDidUpdate } from "rooks";
+import { useContext, useEffect, useState, type FC } from "react";
 
 import { AlarmInfoList } from "@/alarm-info-list";
 import { SiteInfoList } from "@/components/site-info-list";
@@ -28,19 +27,19 @@ import {
 import { DeviceEvent, ProcessStatus } from "@/types/device-event";
 import { getFormattedDateTime } from "@/utils/get-formatted-date-time";
 
-import styles from "./index.module.css";
 import {
   useDeleteMaskedItemMutation,
   useMaskItemMutation,
   usePostProcessSingleEventMutation,
 } from "@/services";
+import styles from "./index.module.css";
 
-import { LoadingOutlined } from "@ant-design/icons";
 import { ThemeContext } from "@/theme";
+import { RootState } from "@/types/store";
+import { LoadingOutlined } from "@ant-design/icons";
 import { MutationTrigger } from "@reduxjs/toolkit/dist/query/react/buildHooks";
 import { MutationDefinition } from "@reduxjs/toolkit/query";
 import { useSelector } from "react-redux";
-import { RootState } from "@/types/store";
 
 type Props = {
   dataTestId?: string;
@@ -98,9 +97,8 @@ export const ProcessAlarmModal: FC<Props> = ({ dataTestId, refetch }) => {
   const filters = useSelector((state: RootState) => state.filters);
 
   const handleMaskItem = async (record: DeviceEvent) => {
-    console.log("record", record);
     const res = await maskItem({ keyId: record.systemId });
-    if ('data' in res && res.data.error === 0) {
+    if ("data" in res && res.data.error === 0) {
       refetch({
         ...filters,
       });
@@ -120,8 +118,12 @@ export const ProcessAlarmModal: FC<Props> = ({ dataTestId, refetch }) => {
     useDeleteMaskedItemMutation();
 
   const handleRecovery = async (record: DeviceEvent) => {
-    const res = await deleteMasked({ keyId: record.obj.keyId });
-    if ('data' in res && res.data.error === 0) {
+    const res = await deleteMasked({
+      keyId: record.systemId,
+      type: record.type || 1,
+    });
+
+    if ("data" in res && res.data.error === 0) {
       refetch({
         ...filters,
       });
@@ -167,7 +169,7 @@ export const ProcessAlarmModal: FC<Props> = ({ dataTestId, refetch }) => {
     if (res) {
       setIsLoading(false);
       dispatch(setShowProcesslarmModal(false));
-      if ('data' in res && res.data.error === 0) {
+      if ("data" in res && res.data.error === 0) {
         refetch({
           ...filters,
         });

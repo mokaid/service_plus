@@ -7,8 +7,7 @@ import { setShowEventsFilterModal } from "@/store/slices/events";
 import { LoadingOutlined } from "@ant-design/icons";
 import { generateColumns } from "./config";
 import { TransformOrgs } from "@/utils/orgs-transform";
-import { MutationTrigger } from "@reduxjs/toolkit/dist/query/react/buildHooks";
-import { MutationDefinition } from "@reduxjs/toolkit/query";
+
 import { Organisation } from "@/types/organisation";
 
 type Props = {
@@ -48,18 +47,14 @@ export const SiteConfigurationTable: FC<Props> = ({
   totalAlerts,
   handlePageChange,
   loading,
-  refetch
+  refetch,
 }) => {
-
   const dispatch = useAppDispatch();
 
-  const handleDelete = useCallback(
-    ({ id, name, type }: DeleteParams) => {
-      // Handle delete logic here
-      console.log(`Deleting ${type} with id ${id} and name ${name}`);
-    },
-    [],
-  );
+  const handleDelete = useCallback(({ id, name, type }: DeleteParams) => {
+    // Handle delete logic here
+    console.log(`Deleting ${type} with id ${id} and name ${name}`);
+  }, []);
 
   const handleEdit = useCallback(
     (record: TableRecord) => {
@@ -79,8 +74,8 @@ export const SiteConfigurationTable: FC<Props> = ({
       isGroup: false,
       isOrganisation: false,
       status: undefined,
-      children: undefined
-    }
+      children: undefined,
+    },
   });
 
   const antIcon = <LoadingOutlined style={{ fontSize: 24 }} spin />;
@@ -91,7 +86,7 @@ export const SiteConfigurationTable: FC<Props> = ({
         bordered
         rowKey="key"
         className={className}
-        dataSource={(data && data?.error == 0) ? TransformOrgs(data?.orgs) : []}
+        dataSource={data && data?.error == 0 ? TransformOrgs(data?.orgs) : []}
         sticky={true}
         columns={columns}
         showSorterTooltip={false}

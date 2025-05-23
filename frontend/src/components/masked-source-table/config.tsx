@@ -8,7 +8,7 @@ import { PermissionGuard } from "../permission-guard";
 const { Link } = Typography;
 
 type ColumnParams = {
-  onProcess: (keyId: number) => void;
+  onProcess: (data: any) => void;
   sites: OrganisationSite[];
 };
 
@@ -61,7 +61,10 @@ export const generateColumns = ({
       render(_, record) {
         return (
           <PermissionGuard keyName="maskSource" action="m">
-            <Link onClick={() => onProcess(JSON.parse(record?.objId))}>
+            <Link onClick={() => onProcess({
+              keyId: record?.systemId,
+              type: record?.type
+            })}>
               Recovery
             </Link>
           </PermissionGuard>

@@ -18,7 +18,7 @@ type Props = {
   dataTestId?: string;
   darkTheme?: boolean;
   site: string;
-  handlePageFilter: () => void; 
+  handlePageFilter: () => void;
 };
 
 type Fields = {
@@ -40,9 +40,8 @@ export const SiteConfigurationDrawer: FC<Props> = ({
   handlePageFilter,
 }) => {
   const dispatch = useAppDispatch();
-  const [form] = Form.useForm<Fields>();
+
   const show = useAppSelector(getShowSiteInfoModalState);
-  const [event] = useAppSelector(getSelectedEvents);
 
   const handleClose = () => {
     dispatch(setShowSiteInfoModal(false));

@@ -13,10 +13,10 @@ const DeleteSiteButton = ({
   const [deleteSite, { isLoading }] = useDeleteSiteMutation();
   const confirmDelete: PopconfirmProps["onConfirm"] = async () => {
     const response = await deleteSite({ siteId: id });
-    if ('data' in response && response.data.error == 0) {
+    if ("data" in response && response.data.error == 0) {
       messageApi.success("Site has been deleted !");
       refetch();
-    } else if ('error' in response) {
+    } else if ("error" in response) {
       messageApi.error(response.error);
     }
   };

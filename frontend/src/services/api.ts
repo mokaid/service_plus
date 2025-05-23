@@ -155,6 +155,8 @@ export const {
   useGetChartEventsResponseTimeMutation,
   useGetChartEventsCountsByStatusMutation,
   useGetEventTopDataMutation,
+  useGetBoxPropertyMutation,
+  usePostOrgContactsMutation,
 
   // EVENTS
   useQueryEventsMutation,

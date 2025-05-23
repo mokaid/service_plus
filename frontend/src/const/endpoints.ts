@@ -24,6 +24,8 @@ export enum ENDPOINTS {
   GET_USER_ALLOWED_SITES = "getUserAllowedSites",
   POST_USER_FILTER = "postUserFilter",
   POST_SINGLE_USER_PERMISSION = "postSingleUserPermission",
+  GET_BOX_PROPERTY = "getBoxProperty",
+  POST_ORG_CONTACTS = "PostOrgContacts",
 
   //SYSTEMS
   GET_SITE_SYSTEMS = "systems",

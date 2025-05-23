@@ -33,34 +33,60 @@ export function getOfflineSystemsCount(data: any) {
   if (!data?.site) return result;
   data.site.forEach((site: { system?: any[] }) => {
     if (site.system && Array.isArray(site.system)) {
-      site.system.forEach((system: { systemName: string; object?: { offline?: number } }) => {
-        const name = system.systemName;
-        const offlineCount = system.object?.offline || 0;
-        if (result[name]) {
-          result[name] += offlineCount;
-        } else {
-          result[name] = offlineCount;
-        }
-      });
+      site.system.forEach(
+        (system: { systemName: string; object?: { offline?: number } }) => {
+          const name = system.systemName;
+          const offlineCount = system.object?.offline || 0;
+          if (result[name]) {
+            result[name] += offlineCount;
+          } else {
+            result[name] = offlineCount;
+          }
+        },
+      );
     }
   });
 
   return result;
 }
+export function getSelectedSiteOfflineSystemsCount(data: any) {
+  const result: Record<string, number> = {};
+  if (!data) return result;
+  data.forEach((item: any) => {
+    if (item.system && Array.isArray(item.system)) {
+      item.system.forEach(
+        (system: { systemName: string; object?: { offline?: number } }) => {
+          const name = system.systemName;
+          const offlineCount = system.object?.offline || 0;
+          if (result[name]) {
+            result[name] += offlineCount;
+          } else {
+            result[name] = offlineCount;
+          }
+        },
+      );
+    }
+  });
+
+  return result;
+}
+
 export function getTotalSystemsCount(data: any) {
   const result: Record<string, number> = {};
   if (!data?.site) return result;
   data.site.forEach((site: { system?: any[] }) => {
     if (site.system && Array.isArray(site.system)) {
-      site.system.forEach((system: { systemName: string; object?: { total?: number } }) => {
-        const name = system.systemName;
-        const totalCount = system.object?.total || 0;
-        if (result[name]) {
-          result[name] += totalCount;
-        } else {
-          result[name] = totalCount;
-        }
-      });
+      site.system.forEach(
+        (system: { systemName: string; object?: { total?: number } }) => {
+          const name = system.systemName;
+          const totalCount = system.object?.total || 0;
+          if (result[name]) {
+            result[name] += totalCount;
+          } else {
+            result[name] = totalCount;
+          }
+        },
+      );
     }
   });
 

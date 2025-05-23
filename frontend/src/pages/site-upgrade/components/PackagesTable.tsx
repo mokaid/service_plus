@@ -45,6 +45,7 @@ export const PackagesTable = ({ data, loading, refetch }: Props) => {
         </Col>
         <Col span={24}>
           <Table
+            rowKey={"id"}
             dataSource={data}
             loading={loading}
             className={darkTheme ? "alerts_table" : "alerts_table_light"}

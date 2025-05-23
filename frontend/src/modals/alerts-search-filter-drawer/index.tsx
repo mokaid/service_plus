@@ -138,10 +138,14 @@ export const AlertsSearchFilterDrawer: FC<Props> = ({
     form.setFieldsValue({
       datetime: [initialFilters.startTime, initialFilters.endTime],
       priority: initialFilters.priority,
-      devices: initialFilters.devices === null ? undefined : initialFilters.devices,
+      devices:
+        initialFilters.devices === null ? undefined : initialFilters.devices,
       sites: initialFilters.sites,
-      eventType: initialFilters.eventType === null ? undefined : initialFilters.eventType,
-      vendors: initialFilters.vendors
+      eventType:
+        initialFilters.eventType === null
+          ? undefined
+          : initialFilters.eventType,
+      vendors: initialFilters.vendors,
     });
 
     // Update Redux state with initial filters
@@ -196,7 +200,7 @@ export const AlertsSearchFilterDrawer: FC<Props> = ({
         const response = await getSiteSystem({
           siteId: siteSystemArray[i],
         });
-        if ('data' in response) {
+        if ("data" in response) {
           vendorsArray.push(...(response.data || []));
         }
       }
@@ -225,7 +229,7 @@ export const AlertsSearchFilterDrawer: FC<Props> = ({
           pageIndex: 1,
           pageSize: 1000,
         });
-        if ('data' in response) {
+        if ("data" in response) {
           devicesArray.push(...(response.data || []));
         }
       }
@@ -254,7 +258,7 @@ export const AlertsSearchFilterDrawer: FC<Props> = ({
           pageIndex: 1,
           pageSize: 1000,
         });
-        if ('data' in response) {
+        if ("data" in response) {
           categoryArray.push(...(response.data || []));
         }
       }
@@ -323,7 +327,7 @@ export const AlertsSearchFilterDrawer: FC<Props> = ({
         devices: values.devices || null,
         eventType: values.eventType || null,
         vendors: vendorNames,
-      })
+      }),
     );
     dispatch(setShowEventsFilterModal(false));
   };
@@ -358,7 +362,7 @@ export const AlertsSearchFilterDrawer: FC<Props> = ({
       // destroyOnClose={true}
       onClose={handleClose}
       data-testid={dataTestId}
-      style={{ background: `${darkTheme ? " #0C183B" : ""}` }}
+      style={{ background: `${darkTheme ? "#0C183B" : ""}` }}
     >
       <Form<Fields>
         form={form}
@@ -377,9 +381,9 @@ export const AlertsSearchFilterDrawer: FC<Props> = ({
           getValueProps={getCheckboxGroupProps}
         >
           <Checkbox.Group
-            options={ALARM_LEVEL_OPTIONS.map(opt => ({
+            options={ALARM_LEVEL_OPTIONS.map((opt) => ({
               label: opt.label,
-              value: opt.value[0]
+              value: opt.value[0],
             }))}
             className={"filter_checkbox"}
           />

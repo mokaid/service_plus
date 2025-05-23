@@ -57,13 +57,12 @@ export const AlarmSelfRecoverySiteTable: FC<Props> = ({
     useQueryEventsMutation();
 
   //USER ALLOWED SITES
-  const [getUserAllowedSites] =
-    useGetUserAllowedSitesMutation();
+  const [getUserAllowedSites] = useGetUserAllowedSitesMutation();
   const handleAllowedSites = async () => {
     const res = await getUserAllowedSites({ userGuid: undefined });
-    if ('data' in res) {
+    if ("data" in res) {
       setAllowedSites(
-        res.data.filter.map((item: { orgId: string }) => {
+        (res.data.filter || []).map((item: { orgId: string }) => {
           return item.orgId;
         }),
       );
@@ -125,7 +124,7 @@ export const AlarmSelfRecoverySiteTable: FC<Props> = ({
     const res = await handleProcessEvents(body);
     if (res) {
       setIsLoading(false);
-      if ('data' in res) {
+      if ("data" in res) {
         refetch();
         messageApi.open({
           type: "success",

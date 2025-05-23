@@ -57,7 +57,7 @@ export const Users: FC = () => {
         <Col span={24}>
           <Table
             bordered
-            rowKey="eventId" // Replace with the correct key if different
+            rowKey="userName" // Replace with the correct key if different
             className={`${darkTheme ? "alerts_table" : ""}`}
             scroll={{ x: 1200 }}
             dataSource={currentData ? currentData.user : []} // Set fetched users as the data source

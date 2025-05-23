@@ -26,6 +26,7 @@ export const AlarmInfoList: FC<Props> = ({
 }) => {
   const [isMasked, setMasked] = useState<boolean>();
   const [getMasked] = useGetMaskedItemMutation();
+  console.log('event', event);
 
   // Handle masking
   const handleMask = async (event: DeviceEvent) => {
@@ -41,10 +42,12 @@ export const AlarmInfoList: FC<Props> = ({
 
   useEffect(() => {
     (async () => {
-      const res = await getMasked({});
+      const res = await getMasked({id: event.obj.keyId});
+      console.log('res', res);
+      
       if ('data' in res && res.data?.error == 0 && res.data?.data?.list) {
         const found = res.data?.data?.list
-          ? res.data?.data?.list.filter((item: any) => item.keyId == event.obj.keyId)
+          ? res.data?.data?.list.filter((item: any) => item.systemId == event.systemId)
           : false;
         if (found && found.length > 0) {
           setMasked(true);

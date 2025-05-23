@@ -31,7 +31,7 @@ type Props = {
   data: [];
   isLoading: boolean;
   selectedSite: string | null;
-  // setSelectedSite: React.Dispatch<React.SetStateAction<string | null>>;
+  setSelectedSiteId: React.Dispatch<React.SetStateAction<string>>;
 };
 
 const { Search } = Input;
@@ -42,6 +42,7 @@ export const AlertsMap: FC<Props> = ({
   data,
   isLoading,
   selectedSite,
+  setSelectedSiteId,
   // setSelectedSite,
 }) => {
   const { isLoaded } = useJsApiLoader({
@@ -80,6 +81,7 @@ export const AlertsMap: FC<Props> = ({
 
   const handleRemoveFilter = () => {
     dispatch(setSelectedSite(null));
+    setSelectedSiteId("");
     dispatch(
       setFilters({
         ...filters,
@@ -258,7 +260,7 @@ export const AlertsMap: FC<Props> = ({
             {filteredAlertData?.map((data: any) => {
               return (
                 <Marker
-                  key={data?.site?.id}
+                  key={data?.eventId}
                   position={{
                     lat: data?.site?.latitude,
                     lng: data?.site?.longitude,

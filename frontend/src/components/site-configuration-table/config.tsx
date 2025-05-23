@@ -1,15 +1,6 @@
 import { Button, Divider, Space, Tag, Typography } from "antd";
 import type { ColumnType } from "antd/es/table";
 
-import type { OrganisationSite } from "@/types/organisation";
-import {
-  DeleteOutlined,
-  FolderFilled,
-  HomeFilled,
-  PoweroffOutlined,
-  VideoCameraFilled,
-} from "@ant-design/icons";
-import DeleteSiteButton from "./components/DeleteSiteButton";
 import { useAppDispatch } from "@/hooks/use-app-dispatch";
 import {
   setGroupObject,
@@ -19,9 +10,16 @@ import {
   setShowEditOrgDrawer,
   setShowEditSiteDrawer,
 } from "@/store/slices/sites";
-import { MutationTrigger } from "@reduxjs/toolkit/dist/query/react/buildHooks";
-import { MutationDefinition } from "@reduxjs/toolkit/query";
+import type { OrganisationSite } from "@/types/organisation";
+import {
+  FolderFilled,
+  HomeFilled,
+  PoweroffOutlined,
+  VideoCameraFilled,
+} from "@ant-design/icons";
 import { PermissionGuard } from "../permission-guard";
+import DeleteSiteButton from "./components/DeleteSiteButton";
+import { GroupOrSiteNode } from "@/utils/orgs-transform";
 const { Link } = Typography;
 
 type TableRecord = {
@@ -151,7 +149,7 @@ export const generateColumns = ({
   onDelete,
   onEdit,
   refetch,
-}: ColumnParams): ColumnType<OrganisationSite>[] => [
+}: ColumnParams): ColumnType<GroupOrSiteNode>[] => [
   {
     title: "Name",
     dataIndex: "name",

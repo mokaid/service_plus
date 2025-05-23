@@ -1,16 +1,13 @@
-import { Drawer, Form, Input, Space, Switch, Typography } from "antd";
+import { Drawer, Form, Input, Switch, Typography } from "antd";
 import { type FC, useContext, useEffect, useState } from "react";
 
 import { useAppDispatch } from "@/hooks/use-app-dispatch";
 import { ProcessStatus } from "@/types/device-event";
 
-import Search from "antd/es/input/Search";
-import { ThemeContext } from "@/theme";
-import { BaseSelect } from "@/components/base-select";
-import { getMultipleSelectProps } from "@/utils/form-helpers/get-multiple-select-props";
-import styles from "./index.module.css";
 import { SiteMapTable } from "@/components/site-map-table";
+import { ThemeContext } from "@/theme";
 import { OrganisationSite } from "@/types/organisation";
+import styles from "./index.module.css";
 
 type Props = {
   dataTestId?: string;
@@ -55,7 +52,7 @@ export const SiteInfoModal: FC<Props> = ({
     const filteredSites = sites
       ? sites
           .filter((item) =>
-            showOnlyDisconnected ? item.connectionState === false : true,
+            showOnlyDisconnected ? !item.connectionState : true,
           )
           .filter((item) =>
             search

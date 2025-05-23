@@ -4,7 +4,7 @@ import { DescriptionList, DescriptionListItem } from "@/description-list";
 import {
   useDeleteMaskedItemMutation,
   useRestartBoxMutation,
-  useUpdateIoEventsMutation
+  useUpdateIoEventsMutation,
 } from "@/services";
 import { ThemeContext } from "@/theme";
 import {
@@ -21,7 +21,7 @@ import {
   Input,
   InputNumber,
   Space,
-  Tag
+  Tag,
 } from "antd";
 import useMessage from "antd/es/message/useMessage";
 import { BaseSelect } from "../base-select";
@@ -56,16 +56,15 @@ export const EditSiteInfo: FC<Props> = ({
 
   const [form] = Form.useForm();
 
-  const [deleteMasked, { isLoading: isRecovering }] =
-    useDeleteMaskedItemMutation();
+  const [deleteMasked] = useDeleteMaskedItemMutation();
 
   const handleRestart = async () => {
     try {
       const response = await restartBox({ siteId: site });
-      if ('data' in response) {
+      if ("data" in response) {
         messageApi.success("App has been rebooted !");
         // refetch();
-      } else if ('error' in response) {
+      } else if ("error" in response) {
         messageApi.error(response.error);
       }
     } catch (error) {
@@ -78,20 +77,23 @@ export const EditSiteInfo: FC<Props> = ({
         siteId: site,
         ...data,
       });
-      if ('data' in response) {
+      if ("data" in response) {
         messageApi.success("IO Events Text has been updated!");
-      } else if ('error' in response) {
+      } else if ("error" in response) {
         messageApi.error("Failed to update IO Events");
       }
     } catch (error) {
       messageApi.error("There was an error");
     }
   };
-  const handleRecovery = async (keyId: number) => {
-    const res = await deleteMasked({ keyId: keyId });
-    if ('data' in res && res.data.error === 0) {
+  const handleRecovery = async (data: any) => {
+    const res = await deleteMasked({
+      keyId: data.systemId,
+      type: data.type || 1,
+    });
+    if ("data" in res && res.data.error === 0) {
       setMaskedItems((prevItems: any) =>
-        prevItems.filter((item: any) => item.keyId !== keyId),
+        prevItems.filter((item: any) => item.systemId !== data.systemId),
       );
       messageApi.open({
         type: "success",
@@ -106,9 +108,11 @@ export const EditSiteInfo: FC<Props> = ({
   };
   useEffect(() => {
     if (maskedItem?.list) {
-      setMaskedItems(maskedItem.list.filter((i: any) => i.siteId == site));
+      setMaskedItems(maskedItem?.list.filter((i: any) => i.siteId == site));
     }
   }, [maskedItem]);
+
+  console.log(filteredMaskedItems, maskedItem, site, "maskedItem ===>");
 
   // TODO: Get rest info from BE
   const items = useMemo<DescriptionListItem[]>(
@@ -170,7 +174,7 @@ export const EditSiteInfo: FC<Props> = ({
       },
       { label: "Os Version", value: boxStatus?.osVersion || "N/A" },
     ],
-    [site],
+    [site, maskedItem],
   );
 
   const maskeditems = useMemo<DescriptionListItem[]>(
@@ -185,7 +189,7 @@ export const EditSiteInfo: FC<Props> = ({
               label: "Action",
               value: (
                 <Button
-                  onClick={() => handleRecovery(item?.keyId)}
+                  onClick={() => handleRecovery(item)}
                   type="primary"
                   size="small"
                   icon={<RedoOutlined />}
@@ -318,7 +322,7 @@ const ContactCard = ({
             { label: "4", value: 4 },
             { label: "5", value: 5 },
           ]}
-          className={`${darkTheme ? styles.input_bg : ""} select_input`}
+          className={`${darkTheme ? styles.input_bg : ""} alarm_select_input`}
         />
       </Item>
 

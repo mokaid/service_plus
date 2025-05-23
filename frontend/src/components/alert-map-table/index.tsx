@@ -1,13 +1,14 @@
-import { Spin, Table, message } from "antd";
-import { useCallback, useState, type FC } from "react";
+import { ConfigProvider, Spin, Table, message } from "antd";
+import { useCallback, useContext, useEffect, useState, type FC } from "react";
 
 import { LoadingOutlined } from "@ant-design/icons";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useAppSelector } from "@/hooks/use-app-selector";
 import { ProcessAlarmMapModal } from "@/modals/alert-map-modal";
-import { useProcessEventMutation } from "@/services";
+import { useProcessEventMutation, useQueryEventsMutation } from "@/services";
 import { getAlertMapEvents, getSelectedRowIds } from "@/store/selectors/events";
 import {
+  setAlertMapEvents,
   setSelectedEvents,
   setSelectedEventsId,
   setShowProcesslarmModal,
@@ -15,6 +16,9 @@ import {
 import { DeviceEvent } from "@/types/device-event";
 import { ReqProcessEvent } from "@/types/process-event";
 import { generateColumns } from "./config";
+import { RootState } from "@/types/store";
+import { useLocation } from "react-router-dom";
+import { ThemeContext } from "@/theme";
 type Props = {
   className: string;
   dataTestId: string;
@@ -37,27 +41,19 @@ export const AllAlertsMapTable: FC<Props> = ({
   loading,
 }: Props) => {
   const dispatch = useDispatch();
-  const event = useAppSelector(getAlertMapEvents);
+  // const siteEvents = useAppSelector(getAlertMapEvents);
+  const { appTheme } = useContext(ThemeContext);
+  const darkTheme = appTheme === "dark";
   const rowKey = useAppSelector(getSelectedRowIds);
   const [handleProcessEvents, {}] = useProcessEventMutation();
   const [isLoading, setIsLoading] = useState(false);
   const [messageApi, contextHolder] = message.useMessage();
+  const filters = useSelector((state: RootState) => state.filters);
+  const location = useLocation();
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  // const rowSelection: TableProps<any>["rowSelection"] = {
-  //   onChange: (selectedRowKeys: React.Key[], selectedRows: unknown[]) => {
-  //     dispatch(setSelectedEventsId(selectedRowKeys));
-  //     console.log("Selected Row Keys",selectedRowKeys)
+  const [getEvents, { data: events, isLoading: tableLoading }] =
+    useQueryEventsMutation();
 
-  //   },
-  //   // selectedRowKeys: rowKey,
-
-  //   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  //   getCheckboxProps: (record: any) => ({
-  //     disabled: record.name === "Disabled User", // Column configuration not to be checked
-  //     name: record.name,
-  //   }),
-  // };
   const onSelectChange = (selectedRowKeys: React.Key[]) => {
     dispatch(setSelectedEventsId({ selectedRowKeys, pageIndex }));
   };
@@ -86,6 +82,14 @@ export const AllAlertsMapTable: FC<Props> = ({
     if (res) {
       setIsLoading(false);
       if ("data" in res) {
+        await getEvents({
+          ...filters,
+          processed: 0,
+          sites: [location.search.split("=")[1]],
+        });
+
+        dispatch(setAlertMapEvents(events.data.event));
+
         messageApi.open({
           type: "success",
           content: "Process status updated",
@@ -99,6 +103,21 @@ export const AllAlertsMapTable: FC<Props> = ({
     }
   };
 
+  useEffect(() => {
+    (async () => {
+      await getEvents({
+        ...filters,
+        pageSize,
+        pageIndex,
+        sites:
+          filters.sites.length > 0
+            ? filters.sites
+            : [location.search.split("=")[1]],
+        processed: 0,
+      });
+    })();
+  }, [filters, pageSize, pageIndex, getEvents]);
+
   const columns = generateColumns({
     onProcess: handleProcessAlarm,
     onMark: handleMark,
@@ -108,30 +127,32 @@ export const AllAlertsMapTable: FC<Props> = ({
   return (
     <>
       {contextHolder}
-      <Table
-        rowKey="eventId"
-        className={className}
-        scroll={{ x: 1200 }}
-        dataSource={event.find((item) => item.pageIndex === pageIndex)?.data}
-        sticky={true}
-        columns={columns}
-        rowSelection={rowSelection}
-        showSorterTooltip={false}
-        loading={{
-          indicator: <Spin indicator={antIcon} />,
-          spinning: loading || isLoading,
-        }}
-        pagination={{
-          pageSize,
-          showQuickJumper: true,
-          showSizeChanger: true,
-          total: Math.ceil(totalAlerts / pageSize),
-          current: pageIndex,
-          onChange: handlePageChange,
-        }}
-        data-testid={dataTestId}
-        // preserveSelectedRowKeys={true}
-      />
+      <ConfigProvider>
+        <Table
+          rowKey="eventId"
+          className={className}
+          scroll={{ x: 1200 }}
+          dataSource={events?.data?.event}
+          sticky={true}
+          columns={columns}
+          rowSelection={rowSelection}
+          showSorterTooltip={false}
+          loading={{
+            indicator: <Spin indicator={antIcon} />,
+            spinning: loading || tableLoading,
+          }}
+          pagination={{
+            pageSize,
+            showQuickJumper: true,
+            showSizeChanger: true,
+            total: Math.ceil(totalAlerts / pageSize),
+            current: pageIndex,
+            onChange: handlePageChange,
+          }}
+          data-testid={dataTestId}
+          // preserveSelectedRowKeys={true}
+        />
+      </ConfigProvider>
 
       <ProcessAlarmMapModal
         dataTestId="process-alarm"

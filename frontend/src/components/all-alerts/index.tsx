@@ -196,18 +196,13 @@ export const AllAlerts: FC = () => {
     }
   };
 
-  const setDataIntoStates = (data: DeviceEvent[]) => {
-    dispatch(setAllEvents(data));
-  };
-
   useEffect(() => {
-    if (dashboardStatistics) {
-      setDataIntoStates(dashboardStatistics?.allAlerts);
-    }
-    if (dashboardStatistics) {
-      console.log(dashboardStatistics);
-    }
-  }, [dashboardStatistics]);
+    (async () => {
+      const res = await getAllEvents({
+        processed: 0,
+      });
+    })();
+  }, []);
 
   return (
     <>
@@ -280,14 +275,13 @@ export const AllAlerts: FC = () => {
 
         <Col span={24}>
           <AllAlertsTable
-            refetch={getAssetsStatistics}
+            refetch={getAllEvents}
             dataTestId="all-alerts-table"
             pageIndex={pageIndex}
             pageSize={pageSize}
             handlePageChange={handlePageChange}
             loading={dashboardLoading}
             className={`${darkTheme ? "alerts_table" : ""}`}
-            data={null}
             totalAlerts={totalAlerts}
           />
         </Col>

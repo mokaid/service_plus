@@ -15,11 +15,13 @@ export const generateColumns = ({
   {
     title: "Site ID",
     dataIndex: "id",
+    key: "id",
     width: 350,
     sorter: true,
   },
   {
     title: "Site",
+    key: "id",
     dataIndex: "name",
     width: 350,
     sorter: true,
@@ -27,6 +29,7 @@ export const generateColumns = ({
   {
     title: "Quick Recovery Count",
     dataIndex: "count",
+    key: "id",
     width: 350,
     sorter: true,
   },
@@ -34,6 +37,7 @@ export const generateColumns = ({
   {
     title: "Actions",
     dataIndex: "eventId",
+    key: "id",
     sorter: false,
     width: 100,
     // fixed: "right",

@@ -92,4 +92,21 @@ export const userEndpoints = (builder: EndpointBuilder<any, any, any>) => ({
     }),
     transformResponse: (response: { data: any }) => response.data,
   }),
+
+  getBoxProperty: builder.mutation({
+    query: (body: any) => ({
+      url: ENDPOINTS.GET_BOX_PROPERTY,
+      method: "POST",
+      body,
+    }),
+    transformResponse: (response: { data: any }) => response.data,
+  }),
+  postOrgContacts: builder.mutation({
+    query: (body: any) => ({
+      url: ENDPOINTS.POST_ORG_CONTACTS,
+      method: "POST",
+      body,
+    }),
+    transformResponse: (response: { data: any }) => response.data,
+  }),
 });

@@ -1,11 +1,11 @@
-import { type FC, useMemo } from "react";
+import { type FC, useEffect, useMemo } from "react";
 
 import { DescriptionList, DescriptionListItem } from "@/description-list";
 import { OrganisationSite } from "@/types/organisation";
 import {
   ContactsOutlined,
   MailOutlined,
-  PoweroffOutlined
+  PoweroffOutlined,
 } from "@ant-design/icons";
 import { Card, Space, Tag, Typography } from "antd";
 
@@ -16,12 +16,23 @@ type Props = {
   darkTheme?: boolean;
 };
 
-export const SiteInfoListMap: FC<Props> = ({
-  site,
-  className,
-  dataTestId,
-}) => {
+type contactsTypes = {
+  countryCode: number;
+  dutyHours: number;
+  email: string;
+  enableSendEmail: number;
+  enableSendSMS: number;
+  gender: number;
+  id: string;
+  name: string;
+  org: string;
+  phone: string;
+  remark: string;
+};
+
+export const SiteInfoListMap: FC<Props> = ({ site, className, dataTestId }) => {
   // TODO: Get rest info from BE
+
   const items = useMemo<DescriptionListItem[]>(
     () => [
       {
@@ -29,36 +40,47 @@ export const SiteInfoListMap: FC<Props> = ({
         value: (
           <Space size="small">
             {/* {event.obj.key} */}
-            <Tag color={site.connectionState ? "green-inverse" : "red-inverse"}> <PoweroffOutlined /> { site.connectionState ? "Online" : "Offline" } </Tag>
+            <Tag
+              color={site?.connectionState ? "green-inverse" : "red-inverse"}
+            >
+              {" "}
+              <PoweroffOutlined />{" "}
+              {site?.connectionState ? "Online" : "Offline"}{" "}
+            </Tag>
           </Space>
         ),
       },
-      { label: "Box type", value:  <Tag color={(site.boxType == 1) ? "orange" : "cyan"}> { (site.boxType == 1) ? "Lite Version" : "Standard Version" } </Tag> },
-      { label: "Site ID", value: site.id },
-      { label: "Site Name", value: site.name },
-      { label: "Site Address", value: site.address },
-      { label: "Start Date and Time", value: site.activate || "N/A" },
-      { label: "End Date and Time", value: site.deactivate || "N/A" },
-      { label: "Sim Card Expiration", value: site.simExpirationTime || "N/A" },
-      { label: "Remark", value: site.remark || "N/A" },
+      {
+        label: "Box type",
+        value: (
+          <Tag color={site?.boxType == 1 ? "orange" : "cyan"}>
+            {" "}
+            {site?.boxType == 1 ? "Lite Version" : "Standard Version"}{" "}
+          </Tag>
+        ),
+      },
+      { label: "Site ID", value: site?.id },
+      { label: "Site Name", value: site?.name },
+      { label: "Site Address", value: site?.address },
+      { label: "Start Date and Time", value: site?.activate || "N/A" },
+      { label: "End Date and Time", value: site?.deactivate || "N/A" },
+      { label: "Sim Card Expiration", value: site?.simExpirationTime || "N/A" },
+      { label: "Remark", value: site?.remark || "N/A" },
     ],
-    [],
+    [site],
   );
 
-  const contactDetails = [
-    {
-      index: 1,
-      contactEmail: site.contactEmail || "N/A",
-      contactPerson: site.contactPerson || "N/A",
-      contactPhoneNum: site.contactPhoneNum || "N/A",
+  const contactDetails = (site?.contacts || []).map(
+    (item: contactsTypes, index: number) => {
+      return {
+        index: index + 1,
+        contactEmail: item.email || "N/A",
+        contactPerson: item.name || "N/A",
+        contactPhoneNum: item.phone || "N/A",
+      };
     },
-    {
-      index: 2,
-      contactEmail: site.contactEmail2 || "N/A",
-      contactPerson: site.contactPerson2 || "N/A",
-      contactPhoneNum: site.contactPhoneNum2 || "N/A",
-    },
-  ]
+  );
+
   return (
     <>
       <DescriptionList
@@ -68,9 +90,9 @@ export const SiteInfoListMap: FC<Props> = ({
         dataTestId={dataTestId}
       />
 
-      {
-        contactDetails.map(contact => <ContactCard contact={contact} />)
-      }
+      {contactDetails.map((contact: any) => (
+        <ContactCard contact={contact} />
+      ))}
     </>
   );
 };
@@ -78,9 +100,7 @@ export const SiteInfoListMap: FC<Props> = ({
 const ContactCard = ({ contact }: { contact: any }) => {
   return (
     <>
-      <Typography.Text>
-        Contact {contact.index}
-      </Typography.Text>
+      <Typography.Text>Contact {contact.index}</Typography.Text>
       <Card className="contact_card">
         <p>{contact.contactPerson}</p>
         <div style={{ display: "flex", gap: "5px", alignItems: "center" }}>

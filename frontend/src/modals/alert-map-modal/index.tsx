@@ -1,5 +1,5 @@
-import { useState, type FC } from "react";
 import { Button, Drawer, Form, Input, Radio, Space, Spin, message } from "antd";
+import { useState, type FC } from "react";
 import { useDidUpdate } from "rooks";
 
 import { AlarmInfoList } from "@/alarm-info-list";
@@ -18,10 +18,14 @@ import {
 import { DeviceEvent, ProcessStatus } from "@/types/device-event";
 import { getFormattedDateTime } from "@/utils/get-formatted-date-time";
 
-import styles from "./index.module.css";
-import { useDeleteMaskedItemMutation, useMaskItemMutation, useProcessEventMutation } from "@/services";
+import {
+  useDeleteMaskedItemMutation,
+  useMaskItemMutation,
+  useProcessEventMutation,
+} from "@/services";
 import { ReqProcessEvent } from "@/types/process-event";
 import { LoadingOutlined } from "@ant-design/icons";
+import styles from "./index.module.css";
 
 type Props = {
   dataTestId?: string;
@@ -59,28 +63,30 @@ export const ProcessAlarmMapModal: FC<Props> = ({ dataTestId, refetch }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [messageApi, contextHolder] = message.useMessage();
 
-  const [ maskItem ] = useMaskItemMutation();
-  const handleMaskItem = async ( record: DeviceEvent ) => {
-    const res = await maskItem({keyId: record.obj.keyId});
-    if ('data' in res && res.data.error === 0) {
+  const [maskItem] = useMaskItemMutation();
+  const handleMaskItem = async (record: DeviceEvent) => {
+    const res = await maskItem({ keyId: record.systemId });
+    if ("data" in res && res.data.error === 0) {
       refetch();
       messageApi.open({
         type: "success",
         content: "Masked Successfully !",
       });
-      
     } else {
       messageApi.open({
         type: "error",
         content: "There was an error",
       });
     }
-  }
-  
-  const [ deleteMasked ] = useDeleteMaskedItemMutation();
+  };
+
+  const [deleteMasked] = useDeleteMaskedItemMutation();
   const handleRecovery = async (record: DeviceEvent) => {
-    const res = await deleteMasked({keyId: record.obj.keyId});
-    if ('data' in res && res.data.error === 0) {
+    const res = await deleteMasked({
+      keyId: record.systemId,
+      type: record.type || 1,
+    });
+    if ("data" in res && res.data.error === 0) {
       refetch();
       messageApi.open({
         type: "success",
@@ -92,7 +98,7 @@ export const ProcessAlarmMapModal: FC<Props> = ({ dataTestId, refetch }) => {
         content: "There was an error",
       });
     }
-  }
+  };
 
   const handleClose = () => {
     dispatch(setShowProcesslarmModal(false));
@@ -126,13 +132,12 @@ export const ProcessAlarmMapModal: FC<Props> = ({ dataTestId, refetch }) => {
     if (res) {
       setIsLoading(false);
       dispatch(setShowProcesslarmModal(false));
-      if ('data' in res && res.data.error === 0) {
+      if ("data" in res && res.data.error === 0) {
         refetch();
         messageApi.open({
           type: "success",
           content: "Process status updated",
         });
-        
       } else {
         messageApi.open({
           type: "error",

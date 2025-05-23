@@ -133,13 +133,17 @@ export const AllAlertsMap: FC = () => {
         dispatch(
           setAlertMapEvents({
             pageIndex: pageIndex,
-            data: 'data' in data ? data.data.data.event : [],
+            data: "data" in data ? data.data.data.event : [],
           }),
         );
-        dispatch(setTotalAlertsSiteGlobal('data' in data ? data.data.data.totalCount : 0));
+        dispatch(
+          setTotalAlertsSiteGlobal(
+            "data" in data ? data.data.data.totalCount : 0,
+          ),
+        );
         dispatch(setGlobalPageSize(pageSize));
         setRender(false);
-        if ('error' in data) {
+        if ("error" in data) {
           messageApi.open({
             type: "error",
             content: data.error.data.message,
@@ -170,7 +174,6 @@ export const AllAlertsMap: FC = () => {
     data: number[],
   ) => {
     setRender(true);
-    console.log("data", data);
     if (startD !== undefined) {
       setStartDate(startD);
     }
@@ -185,7 +188,6 @@ export const AllAlertsMap: FC = () => {
       const FilteredData = finalResult;
       const allSelectedItems = [].concat(...Object.values(FilteredData));
       setItemLevels(allSelectedItems);
-      console.log("allSelectedItems", allSelectedItems);
     } else {
       setItemLevels([]);
     }
@@ -219,7 +221,7 @@ export const AllAlertsMap: FC = () => {
     };
     const res = await handleProcessEvents(body);
     if (res) {
-      if ('data' in res) {
+      if ("data" in res) {
         messageApi.open({
           type: "success",
           content: "Process status updated",
@@ -262,7 +264,7 @@ export const AllAlertsMap: FC = () => {
               </Form>
 
               <Button
-                className="filter_btn"
+                className={`filter_btn ${darkTheme ? "filter_btn_bg" : ""}`}
                 icon={<FilterOutlined />}
                 onClick={handleFilterClick}
               >
@@ -278,7 +280,7 @@ export const AllAlertsMap: FC = () => {
                 Clear All
               </Button>
               <Button
-                className="filter_btn"
+                className={`filter_btn ${darkTheme ? "filter_btn_bg" : ""}`}
                 icon={<InfoCircleOutlined />}
                 onClick={() => handleSiteInfo()}
               >
@@ -297,7 +299,7 @@ export const AllAlertsMap: FC = () => {
             totalAlerts={totalAlerts}
             handlePageChange={handlePageChange}
             loading={isLoading}
-            className={`${darkTheme ? "alerts_table" : ""}`}
+            className={`${darkTheme ? "alerts_table " : ""}`}
             data={null}
           />
         </Col>
@@ -306,6 +308,7 @@ export const AllAlertsMap: FC = () => {
       <AlertsSearchFilterDrawer
         dataTestId="all-alerts-search-filter"
         handlePageFilterDate={handlePageFilterDate}
+        darkTheme={darkTheme}
       />
       <SiteInfo
         refetch={function () {

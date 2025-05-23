@@ -9,9 +9,9 @@ import { setShowSiteInfoModal } from "@/store/slices/events";
 import { ThemeContext } from "@/theme";
 import { AddSiteModal } from "@/modals/add-site-modal";
 import { AddGroupModal } from "@/modals/add-group-modal";
-import DeleteModal from "@/modals/delete-modal";
+
 import { EditSiteMapModal } from "@/modals/edit-site-map-modal";
-import LinkSitePopOver from "@/components/pop-over/link-site";
+
 import { useGetOrganizationsMutation } from "@/services";
 import { useAppSelector } from "@/hooks/use-app-selector";
 import { getSelectedSite } from "@/store/selectors/sites";
@@ -25,7 +25,6 @@ export const SiteConfiguration: FC = () => {
   const darkTheme = appTheme === "dark";
   const [addSite, setAddSite] = useState<boolean>(false);
   const [addGroup, setAddGroup] = useState<boolean>(false);
-  const [deleteModal, setDeleteModal] = useState<boolean>(false);
   const site = useAppSelector(getSelectedSite);
   const [messageApi, contextHolder] = message.useMessage();
   const [pageIndex, setPageIndex] = useState(1);

@@ -29,6 +29,7 @@ import styles from "./index.module.css";
 import { BaseAreaChart } from "@/charts/area-chart";
 import {
   getOfflineSystemsCount,
+  getSelectedSiteOfflineSystemsCount,
   getTotalSystemsCount,
   splitName,
 } from "@/components/navigation/utils";
@@ -76,7 +77,7 @@ export const Dashboard: FC = () => {
   const [offLine24Hours, setOffline24Hours] = useState<PieGraphDataType[]>([]);
   const [offline7Days, setOffline7Days] = useState<PieGraphDataType[]>([]);
   const [offline30Days, setOffline30Days] = useState<PieGraphDataType[]>([]);
-  const [allowedSites, setAllowedSites] = useState();
+  const [allowedSites, setAllowedSites] = useState<string[]>([]);
 
   const [top10WeeklyAlertsBySite, setTop10WeeklyAlertsBySite] = useState<
     HorizontalBarGraphDataType[]
@@ -90,9 +91,6 @@ export const Dashboard: FC = () => {
   >([]);
 
   const [selectedSiteId, setSelectecSiteId] = useState<string>("");
-
-  const [pageIndex, setPageIndex] = useState(1);
-  const [pageSize, setPageSize] = useState(20);
 
   const { appTheme } = useContext(ThemeContext);
   const darkTheme = appTheme === "dark";
@@ -143,36 +141,34 @@ export const Dashboard: FC = () => {
   const handleAllowedSites = async () => {
     const res = await getUserAllowedSites({ userGuid: user?.userGuid });
     if ("data" in res && res.data) {
-      const sitesArray = await res.data.filter.filter((item: any) => {
+      const sitesArray = await (res.data.filter || []).filter((item: any) => {
         return item.orgId.length > 3;
       });
 
-      const selectedOrgId = await res.data.filter.find((item: any) => {
+      const selectedOrgId = await (res.data.filter || []).find((item: any) => {
         return item.orgId.length <= 3;
       });
 
       let splitOrgId: string;
-      if (selectedOrgId.orgId.split("0").length > 2) {
-        splitOrgId = selectedOrgId.orgId.split("0")[2];
+      if (selectedOrgId?.orgId.split("0").length > 2) {
+        splitOrgId = selectedOrgId?.orgId.split("0")[2];
       } else {
-        splitOrgId = selectedOrgId.orgId.split("0")[1];
+        splitOrgId = selectedOrgId?.orgId.split("0")[1];
       }
 
       setAllowedSites(
-        sitesArray.map((item: any) => {
+        (sitesArray || []).map((item: any) => {
           const siteId = item?.orgId.split(`${splitOrgId}00`)[1];
 
           if (siteId.length > 2) {
-            return `${selectedOrgId.orgId}00${siteId}`;
+            return `${selectedOrgId?.orgId}00${siteId}`;
           } else {
-            return `0${selectedOrgId.orgId}00${siteId}`;
+            return `0${selectedOrgId?.orgId}00${siteId}`;
           }
         }),
       );
     }
   };
-
-  console.log(allowedSites, "allowedSites");
 
   useEffect(() => {
     handleUserPermission();
@@ -208,10 +204,10 @@ export const Dashboard: FC = () => {
       firstLoad = false;
     };
     fetchEvents();
-    const interval = setInterval(fetchEvents, 30000);
+    // const interval = setInterval(fetchEvents, 30000);
     return () => {
       isMounted = false;
-      clearInterval(interval);
+      // clearInterval(interval);
     };
   }, [filters, allowedSites]);
 
@@ -232,6 +228,7 @@ export const Dashboard: FC = () => {
         startTime: formatDate(getLastDay(new Date())),
         endTime: formatDate(new Date()),
         sites: filters.sites.length > 0 ? filters.sites : allowedSites,
+        groupBy: 1,
       });
       if (!isMounted) return;
       if ("data" in res) {
@@ -246,10 +243,10 @@ export const Dashboard: FC = () => {
       firstLoad = false;
     };
     fetch24h();
-    const interval = setInterval(fetch24h, 30000);
+    // const interval = setInterval(fetch24h, 30000);
     return () => {
       isMounted = false;
-      clearInterval(interval);
+      // clearInterval(interval);
     };
   }, [filters, allowedSites]);
 
@@ -264,6 +261,7 @@ export const Dashboard: FC = () => {
         startTime: formatDate(getLastWeekDate(new Date())),
         endTime: formatDate(new Date()),
         sites: filters.sites.length > 0 ? filters.sites : allowedSites,
+        groupBy: 1,
       });
       if (!isMounted) return;
       if ("data" in res) {
@@ -278,10 +276,10 @@ export const Dashboard: FC = () => {
       firstLoad = false;
     };
     fetch7d();
-    const interval = setInterval(fetch7d, 30000);
+    // const interval = setInterval(fetch7d, 30000);
     return () => {
       isMounted = false;
-      clearInterval(interval);
+      // clearInterval(interval);
     };
   }, [filters, allowedSites]);
 
@@ -296,6 +294,7 @@ export const Dashboard: FC = () => {
         startTime: formatDate(getLastMonthDate(new Date())),
         endTime: formatDate(new Date()),
         sites: filters.sites.length > 0 ? filters.sites : allowedSites,
+        groupBy: 1,
       });
       if (!isMounted) return;
       if ("data" in res) {
@@ -310,10 +309,10 @@ export const Dashboard: FC = () => {
       firstLoad = false;
     };
     fetch30d();
-    const interval = setInterval(fetch30d, 30000);
+    // const interval = setInterval(fetch30d, 30000);
     return () => {
       isMounted = false;
-      clearInterval(interval);
+      // clearInterval(interval);
     };
   }, [filters, allowedSites]);
 
@@ -345,10 +344,10 @@ export const Dashboard: FC = () => {
       firstLoad = false;
     };
     fetchStatus();
-    const interval = setInterval(fetchStatus, 30000);
+    // const interval = setInterval(fetchStatus, 30000);
     return () => {
       isMounted = false;
-      clearInterval(interval);
+      // clearInterval(interval);
     };
   }, [filters, allowedSites]);
 
@@ -381,10 +380,10 @@ export const Dashboard: FC = () => {
       firstLoad = false;
     };
     fetchSystemCount();
-    const interval = setInterval(fetchSystemCount, 30000);
+    // const interval = setInterval(fetchSystemCount, 30000);
     return () => {
       isMounted = false;
-      clearInterval(interval);
+      // clearInterval(interval);
     };
   }, [selectedSiteId, allowedSites]);
 
@@ -422,10 +421,10 @@ export const Dashboard: FC = () => {
       firstLoad = false;
     };
     fetchResponseTime();
-    const interval = setInterval(fetchResponseTime, 30000);
+    // const interval = setInterval(fetchResponseTime, 30000);
     return () => {
       isMounted = false;
-      clearInterval(interval);
+      // clearInterval(interval);
     };
   }, [selectedSiteId, allowedSites]);
 
@@ -449,7 +448,16 @@ export const Dashboard: FC = () => {
       if (!isMounted) return;
       if ("data" in res) {
         if (JSON.stringify(res.data.data?.data) !== JSON.stringify(prevData)) {
-          setAllWeeklyAlerts(res.data.data?.data || []);
+          setAllWeeklyAlerts(
+            res.data.data?.data.map((item: any) => {
+              return {
+                count: item.count,
+                name: splitName(item.name)
+                  .filter((_, index) => index > 0)
+                  .join(" "),
+              };
+            }) || [],
+          );
           setChartTop10EventsLoader(false);
           prevData = res.data.data?.data;
         } else if (firstLoad) {
@@ -459,10 +467,10 @@ export const Dashboard: FC = () => {
       firstLoad = false;
     };
     fetchAllWeeklyAlerts();
-    const interval = setInterval(fetchAllWeeklyAlerts, 30000);
+    // const interval = setInterval(fetchAllWeeklyAlerts, 30000);
     return () => {
       isMounted = false;
-      clearInterval(interval);
+      // clearInterval(interval);
     };
   }, [allowedSites]);
 
@@ -491,10 +499,10 @@ export const Dashboard: FC = () => {
       firstLoad = false;
     };
     fetchTop10WeeklyAlertsBySite();
-    const interval = setInterval(fetchTop10WeeklyAlertsBySite, 30000);
+    // const interval = setInterval(fetchTop10WeeklyAlertsBySite, 30000);
     return () => {
       isMounted = false;
-      clearInterval(interval);
+      // clearInterval(interval);
     };
   }, [allowedSites]);
 
@@ -524,10 +532,10 @@ export const Dashboard: FC = () => {
       firstLoad = false;
     };
     fetchWeeklyAlertsBySystem();
-    const interval = setInterval(fetchWeeklyAlertsBySystem, 30000);
+    // const interval = setInterval(fetchWeeklyAlertsBySystem, 30000);
     return () => {
       isMounted = false;
-      clearInterval(interval);
+      // clearInterval(interval);
     };
   }, [allowedSites]);
 
@@ -557,10 +565,10 @@ export const Dashboard: FC = () => {
       firstLoad = false;
     };
     fetchWeeklyAlertsByPriority();
-    const interval = setInterval(fetchWeeklyAlertsByPriority, 30000);
+    // const interval = setInterval(fetchWeeklyAlertsByPriority, 30000);
     return () => {
       isMounted = false;
-      clearInterval(interval);
+      // clearInterval(interval);
     };
   }, [allowedSites]);
 
@@ -622,21 +630,21 @@ export const Dashboard: FC = () => {
     const lowArray = {
       name: "Low",
       count: lowPriority?.reduce((total, item) => {
-        return total + (item?.value ?? 0);
+        return total + (item?.count ?? 0);
       }, 0),
     };
 
     const mediumArray = {
       name: "Medium",
       count: mediumPriority?.reduce((total, item) => {
-        return total + (item?.value ?? 0);
+        return total + (item?.count ?? 0);
       }, 0),
     };
 
     const highArray = {
       name: "High",
       count: highPriority?.reduce((total, item) => {
-        return total + (item?.value ?? 0);
+        return total + (item?.count ?? 0);
       }, 0),
     };
 
@@ -661,13 +669,21 @@ export const Dashboard: FC = () => {
     );
   }, [site, selectedSiteId, allowedSites]);
 
-  const offlineSystems = getOfflineSystemsCount(siteSystemObjectCount);
+  const selectedSiteOfflineData = getSelectedSiteOfflineSystemsCount(
+    siteSystemObjectCount?.site.filter((item: any) => {
+      return item.siteId === selectedSiteId;
+    }),
+  );
+
+  const offlineSystems = selectedSiteId
+    ? selectedSiteOfflineData
+    : getOfflineSystemsCount(siteSystemObjectCount);
 
   const totalOfflineSystems = useMemo(() => {
     return Object.values(offlineSystems).reduce((total, item) => {
       return Number(total) + Number(item);
     }, 0);
-  }, [offlineSystems]);
+  }, [offlineSystems, selectedSiteId, allowedSites]);
 
   const OfflineSystemsData = useMemo((): PieGraphDataType[] => {
     const count = Object.values(offlineSystems);
@@ -679,7 +695,7 @@ export const Dashboard: FC = () => {
         count: Number(item),
       };
     });
-  }, [offlineSystems]);
+  }, [offlineSystems, selectedSiteId, allowedSites]);
 
   const totalAssetsCount = getTotalSystemsCount(siteSystemObjectCount);
 
@@ -696,20 +712,20 @@ export const Dashboard: FC = () => {
       return {
         name: names[index],
         value: Number(item),
-        count: Number(item) // Added count property to match PieGraphDataType
+        count: Number(item), // Added count property to match PieGraphDataType
       };
     });
   }, [totalAssetsCount]);
 
-  const successRateColor = (rate: number) => {
-    if (rate <= 40) {
-      return "red";
-    } else if (rate > 40 && rate <= 75) {
-      return "orange";
-    } else {
-      return "green";
-    }
-  };
+  // const successRateColor = (rate: number) => {
+  //   if (rate <= 40) {
+  //     return "red";
+  //   } else if (rate > 40 && rate <= 75) {
+  //     return "orange";
+  //   } else {
+  //     return "green";
+  //   }
+  // };
 
   const handleFilterClick = () => {
     dispatch(setShowEventsFilterModal(true));
@@ -759,7 +775,7 @@ export const Dashboard: FC = () => {
           data={events ? events?.data?.event : []}
           dataTestId="alerts-map"
           selectedSite={site.selectedSite ? site.selectedSite : ""}
-          // setSelectedSite={setSelectedSite}
+          setSelectedSiteId={setSelectecSiteId}
         />
       </Col>
 
@@ -790,7 +806,8 @@ export const Dashboard: FC = () => {
               value={`${
                 closedAlarmTickets?.count
                   ? `${Math.ceil(
-                      (closedAlarmTickets?.count / openAlarmTickets?.count) *
+                      (closedAlarmTickets?.count /
+                        (openAlarmTickets?.count + closedAlarmTickets?.count)) *
                         100,
                     )}%`
                   : 0
@@ -875,7 +892,11 @@ export const Dashboard: FC = () => {
                 darkTheme ? styles.widget_bg : styles.widget_bg_light
               }`}
               dataTestId="weekly-priority-alerts-chart"
-              centerText={offLine24Hours?.length?.toString()}
+              centerText={offLine24Hours
+                ?.reduce((total, item) => {
+                  return total + item.count;
+                }, 0)
+                .toString()}
               data={
                 offLine24Hours?.map((item: any) => ({
                   value: item.count,
@@ -894,7 +915,11 @@ export const Dashboard: FC = () => {
                 darkTheme ? styles.widget_bg : styles.widget_bg_light
               }`}
               dataTestId="weekly-priority-alerts-chart"
-              centerText={offline7Days?.length.toString()}
+              centerText={offline7Days
+                ?.reduce((total, item) => {
+                  return total + item.count;
+                }, 0)
+                .toString()}
               data={
                 offline7Days?.map((item: any) => ({
                   value: item.count,
@@ -913,7 +938,11 @@ export const Dashboard: FC = () => {
                 darkTheme ? styles.widget_bg : styles.widget_bg_light
               }`}
               dataTestId="weekly-priority-alerts-chart"
-              centerText={offline30Days?.length.toString()}
+              centerText={offline30Days
+                ?.reduce((total, item) => {
+                  return total + item.count;
+                }, 0)
+                .toString()}
               data={
                 offline30Days?.map((item: any) => ({
                   value: item.count,

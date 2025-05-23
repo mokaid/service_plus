@@ -1,33 +1,32 @@
-import { type FC, useCallback, useState, useEffect } from "react";
-import { Spin, Table, message, type TableProps } from "antd";
+import { Spin, Table, message } from "antd";
+import { useCallback, useEffect, useState, type FC } from "react";
 
+import { useAppSelector } from "@/hooks/use-app-selector";
 import { ProcessAlarmModal } from "@/modals/process-alarm-modal";
+import {
+  useGetUserAllowedSitesMutation,
+  useProcessEventMutation,
+  useQueryEventsMutation,
+} from "@/services";
+import { getSelectedRowIds } from "@/store/selectors/events";
 import {
   setSelectedEvents,
   setSelectedEventsId,
   setShowProcesslarmModal,
   setTotalAlertsGlobal,
 } from "@/store/slices/events";
-import { useDispatch, useSelector } from "react-redux";
-import { generateColumns } from "./config";
 import { DeviceEvent } from "@/types/device-event";
-import { LoadingOutlined } from "@ant-design/icons";
-import {
-  useGetUserAllowedSitesMutation,
-  usePostProcessSingleEventMutation,
-  useProcessEventMutation,
-  useQueryEventsMutation,
-} from "@/services";
 import { ReqProcessEvent } from "@/types/process-event";
-import { useAppSelector } from "@/hooks/use-app-selector";
-import { getEvents, getSelectedRowIds } from "@/store/selectors/events";
+import { RootState } from "@/types/store";
+import { LoadingOutlined } from "@ant-design/icons";
 import { MutationTrigger } from "@reduxjs/toolkit/dist/query/react/buildHooks";
 import { MutationDefinition } from "@reduxjs/toolkit/query";
-import { RootState } from "@/types/store";
+import { useDispatch, useSelector } from "react-redux";
+import { generateColumns } from "./config";
 type Props = {
   className: string;
   dataTestId: string;
-  data: DeviceEvent | null;
+  data?: DeviceEvent | null;
   pageIndex: number;
   pageSize: number;
   totalAlerts: number;
@@ -52,6 +51,8 @@ export const AllAlertsTable: FC<Props> = ({
 
   const rowKey = useAppSelector(getSelectedRowIds);
   const [handleProcessEvents, {}] = useProcessEventMutation();
+  const [getEvents, { data: events, isLoading: tableLoading }] =
+    useQueryEventsMutation();
 
   const [allowedSites, setAllowedSites] = useState<any[]>([]);
 
@@ -60,14 +61,13 @@ export const AllAlertsTable: FC<Props> = ({
   const user = useSelector((state: RootState) => state.authState.user);
 
   //USER ALLOWED SITES
-  const [getUserAllowedSites] =
-    useGetUserAllowedSitesMutation();
+  const [getUserAllowedSites] = useGetUserAllowedSitesMutation();
 
   const handleAllowedSites = async () => {
     const res = await getUserAllowedSites({ userGuid: user?.userGuid });
-    if ('data' in res) {
+    if ("data" in res) {
       setAllowedSites(
-        res.data.filter.map((item: { orgId: string }) => {
+        (res.data.filter || []).map((item: { orgId: string }) => {
           return item.orgId;
         }),
       );
@@ -92,7 +92,6 @@ export const AllAlertsTable: FC<Props> = ({
   );
 
   const handleMark = async (selectedEvent: DeviceEvent) => {
-    console.log("🚀 ~ handleMark ~ selectedEvent:", selectedEvent)
     const event: Array<number> = [];
     event.push(...event, selectedEvent.eventId);
     const body: ReqProcessEvent = {
@@ -102,8 +101,9 @@ export const AllAlertsTable: FC<Props> = ({
     const res = await handleProcessEvents(body);
 
     if (res) {
-      if ('data' in res) {
-        refetch({ ...filters });
+      if ("data" in res) {
+        getEvents({ ...filters, processed: 0 });
+
         messageApi.open({
           type: "success",
           content: "Process status updated",
@@ -123,9 +123,6 @@ export const AllAlertsTable: FC<Props> = ({
   });
   const antIcon = <LoadingOutlined style={{ fontSize: 24 }} spin />;
 
-  const [getEvents, { data: events, isLoading: tableLoading }] =
-    useQueryEventsMutation();
-
   useEffect(() => {
     handleAllowedSites();
   }, []);
@@ -136,17 +133,18 @@ export const AllAlertsTable: FC<Props> = ({
         ...filters,
         pageSize,
         pageIndex,
-        sites: filters.sites.length > 0 ? filters.sites : allowedSites,
+        sites: filters.sites.length > 0 ? filters.sites : [],
+        processed: 0,
       });
     })();
-  }, [filters, pageSize, pageIndex, allowedSites]);
+  }, [filters, pageSize, pageIndex, getEvents, refetch]);
 
   useEffect(() => {
     if (events) {
       const total = events?.data?.totalCount || 0;
       dispatch(setTotalAlertsGlobal(total));
     }
-  }, [events]);
+  }, [dispatch, events]);
 
   return (
     <>

@@ -1,4 +1,4 @@
-import { useEffect, type FC, useState, useMemo,useContext } from "react";
+import { useEffect, type FC, useState, useMemo, useContext } from "react";
 import { Col, Row, message } from "antd";
 import { AlarmRecordTable } from "../alarm-record-table";
 import { FilterOutlined } from "@ant-design/icons";
@@ -76,7 +76,6 @@ export const AlarmRecordGrid: FC = () => {
   };
 
   useEffect(() => {
-    console.log("Alarm Record Grid");
     const body: ReqDeviceEvent = {
       pageSize,
       startTime: startDate,
@@ -106,20 +105,22 @@ export const AlarmRecordGrid: FC = () => {
     (async () => {
       if (!doExist) {
         const data = await getAllEvents(body);
-        if ('error' in data) {
+        if ("error" in data) {
           messageApi.open({
-            type: "error", 
+            type: "error",
             content: "Request Timeout",
           });
         }
         dispatch(
           setAlarmRecordEvents({
             pageIndex: pageIndex,
-            data: 'data' in data ? data.data.data.event : [],
+            data: "data" in data ? data.data.data.event : [],
           }),
         );
         dispatch(setGlobalPageSize(pageSize));
-        dispatch(setTotalAlarmRecord('data' in data ? data.data.data.totalCount : 0));
+        dispatch(
+          setTotalAlarmRecord("data" in data ? data.data.data.totalCount : 0),
+        );
         setRender(false);
       }
     })();
@@ -158,7 +159,7 @@ export const AlarmRecordGrid: FC = () => {
     data: number[],
   ) => {
     setRender(true);
-    console.log("data in filter", data);
+
     if (startD !== undefined) {
       setStartDate(startD);
     }
@@ -173,14 +174,13 @@ export const AlarmRecordGrid: FC = () => {
       const FilteredData = finalResult;
       const allSelectedItems = [].concat(...Object.values(FilteredData));
       setItemLevels(allSelectedItems);
-      console.log("allSelectedItems", allSelectedItems);
     } else {
       setItemLevels([]);
     }
   };
   return (
     <>
-    {contextHolder}
+      {contextHolder}
       <Row gutter={[24, 24]}>
         <Col span={24}>
           <div
@@ -201,14 +201,12 @@ export const AlarmRecordGrid: FC = () => {
               autoCorrect="off"
               spellCheck="false"
               defaultValue={initialValue}
-              className={`${
-                darkTheme ? "search_input" : "search_input_light"
-              }`}
+              className={`${darkTheme ? "search_input" : "search_input_light"}`}
             />
 
             <Button
               size="large"
-              className={`filter_btn ${darkTheme ? "filter_btn_bg":""}`}
+              className={`filter_btn ${darkTheme ? "filter_btn_bg" : ""}`}
               icon={<FilterOutlined />}
               onClick={handleFilterClick}
             >
@@ -226,11 +224,15 @@ export const AlarmRecordGrid: FC = () => {
             handlePageChange={handlePageChange}
             refetch={getAllEvents}
             loading={isLoading}
-            className={`${darkTheme ? "alerts_table" :"" }`}
+            className={`${darkTheme ? "alerts_table" : ""}`}
           />
         </Col>
       </Row>
-      <AlertsSearchFilterDrawer darkTheme={darkTheme} alarmRecord={true} handlePageFilterDate={handlePageFilterDate} />
+      <AlertsSearchFilterDrawer
+        darkTheme={darkTheme}
+        alarmRecord={true}
+        handlePageFilterDate={handlePageFilterDate}
+      />
     </>
   );
 };

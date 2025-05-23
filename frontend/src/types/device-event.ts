@@ -12,6 +12,7 @@ export type DeviceEvent = {
   systemId: number | string;
   objId: string;
   siteId: string;
+  type?: number;
   /**
    * YYYY-MM-DD HH:MM:SS
    */

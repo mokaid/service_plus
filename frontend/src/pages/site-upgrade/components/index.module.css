@@ -1,30 +1,65 @@
- .input_bg {
-    background-color: #0C183B !important;
-    border-radius: 2px !important;
+.input_bg {
+  background-color: #0c183b !important;
+  border-radius: 2px !important;
 }
 
-.default_btn{
+.default_btn {
   background: transparent;
   border-radius: 1px;
-  border-color: #1B3687;
+  border-color: #1b3687;
 }
 
-.btn_container{
+.btn_container {
   /* display: "flex", justifyContent: "space-between",gap:"0.5rem" */
   display: flex;
   justify-content: space-between;
   gap: 0.5rem;
 }
-.title{
+.title {
   font-size: 20px !important;
 }
 
-
 .testingTextarea > textarea {
-  background-color: #0C183B !important;
+  background-color: #0c183b !important;
 }
 
 /* .ant-input-affix-wrapper .ant-transfer-list-search .css-dev-only-do-not-override-1tch6d5  { */
-.transferStyles  {
-  background-color: red !important;
+
+.site_upgrade_table :global(.ant-table-thead > tr > th) {
+  background: #232f49 !important;
+  color: #fff !important;
+}
+
+.site_upgrade_table :global(.ant-table-tbody > tr > td) {
+  background: #1b2438 !important;
+  color: #fff !important;
+}
+
+.transferStyles :global(.ant-transfer-list) {
+  border-top-left-radius: 10px !important;
+  border-top-right-radius: 10px !important;
+  border-bottom-left-radius: 0px !important;
+  border-bottom-right-radius: 0px !important;
+}
+
+/* Style the Transfer search input */
+.transferStyles :global(.ant-transfer-list-search input),
+.transferStyles :global(.ant-input-affix-wrapper) {
+  background: #1b2438 !important;
+  color: #fff !important;
+  border: none !important;
+}
+
+/* Style the Transfer empty state (0 items) */
+.transferStyles :global(.ant-transfer-list-body-not-found) {
+  background: #232f49 !important;
+  color: #fff !important;
+}
+
+/* Style the Transfer top bar/header */
+.transferStyles :global(.ant-transfer-list-header),
+.transferStyles :global(.ant-transfer-list-header-title) {
+  background: #232f49 !important;
+  color: #fff !important;
+  border: none !important;
 }

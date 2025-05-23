@@ -1,5 +1,11 @@
 import { Button, Drawer, Form } from "antd";
-import { SetStateAction, useContext, type FC } from "react";
+import {
+  SetStateAction,
+  useContext,
+  useEffect,
+  useState,
+  type FC,
+} from "react";
 
 import { useAppDispatch } from "@/hooks/use-app-dispatch";
 import { useAppSelector } from "@/hooks/use-app-selector";
@@ -17,10 +23,13 @@ import { setShowConfigureSiteDrawer } from "@/store/slices/sites";
 import { ThemeContext } from "@/theme";
 import { EditSiteModal } from "../edit-site-modal";
 import styles from "./index.module.css";
+import { useGetBoxPropertyMutation } from "@/services";
+import { useLocation } from "react-router-dom";
 
 type Props = {
   dataTestId?: string;
   refetch: () => any;
+  sitesData?: any;
 };
 
 type Fields = {
@@ -35,15 +44,31 @@ const initialValues: Fields = {
   caseNumber: "",
 };
 
-export const SiteInfo: FC<Props> = ({ dataTestId, refetch }) => {
+export const SiteInfo: FC<Props> = ({ dataTestId, refetch, sitesData }) => {
   const dispatch = useAppDispatch();
   const { appTheme } = useContext(ThemeContext);
   const darkTheme = appTheme === "dark";
   const [form] = Form.useForm<Fields>();
   const show = useAppSelector(getShowSiteInfoModalState);
   const [event] = useAppSelector(getSelectedEvents);
+  const [siteInfoData, setSiteInfoData] = useState<any>();
 
-  const siteObject = useAppSelector(getSiteObject);
+  const location = useLocation();
+
+  const [getBoxProperty, { data: siteInfo, isLoading: siteInfoLoader }] =
+    useGetBoxPropertyMutation();
+
+  useEffect(() => {
+    if (siteInfo) {
+      setSiteInfoData(siteInfo);
+    }
+  }, [siteInfo]);
+
+  useEffect(() => {
+    getBoxProperty({
+      siteId: location.search.split("=")[1],
+    });
+  }, []);
 
   const handleClose = () => {
     dispatch(setShowSiteInfoModal(false));
@@ -78,17 +103,21 @@ export const SiteInfo: FC<Props> = ({ dataTestId, refetch }) => {
       >
         <div className={styles.container}>
           <>
-            <SiteInfoListMap site={siteObject} />
+            <SiteInfoListMap
+              site={sitesData ? sitesData?.site : siteInfoData?.site}
+            />
           </>
         </div>
         <EditSiteModal
           refetch={refetch}
+          site={sitesData ? sitesData?.site : siteInfoData?.site}
           Show={false}
           setAddSite={function (): void {
             throw new Error("Function not implemented.");
           }}
           organizations={undefined}
           organizationsLoading={false}
+          setSiteInfoData={setSiteInfoData}
         />
       </Drawer>
     </>

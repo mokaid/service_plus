@@ -126,13 +126,13 @@ const Step1 = ({
   const handleSubmitSite = async (data: any) => {
     try {
       const result = await createSite(data);
-      if ('data' in result && !result?.data?.error) {
+      if ("data" in result && !result?.data?.error) {
         messageApi.success(`Site has been added successfully !`);
         form.resetFields();
         getOrganizations({});
         // handleCancel();
         setAddSite(false);
-      } else if ('data' in result && result?.data?.error) {
+      } else if ("data" in result && result?.data?.error) {
         messageApi.error(result?.data?.desc);
       }
     } catch (error) {
@@ -144,7 +144,7 @@ const Step1 = ({
   return (
     <>
       <Form<SiteFields>
-        // form={form}
+        form={form}
         layout="vertical"
         name="add-site-form"
         onFinish={handleSubmitSite}
@@ -254,11 +254,11 @@ const Step2 = ({
   const handleSubmitOrganization = async (data: any) => {
     try {
       const result = await createOrganization(data);
-      if ('data' in result && !result?.data?.error) {
+      if ("data" in result && !result?.data?.error) {
         messageApi.success(`Organization has been added successfully !`);
         getOrganizations({});
         // handleCancel();
-      } else if ('data' in result && result?.data?.error) {
+      } else if ("data" in result && result?.data?.error) {
         messageApi.error(result?.data?.desc);
       }
     } catch (error) {

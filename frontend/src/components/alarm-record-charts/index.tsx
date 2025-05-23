@@ -44,6 +44,7 @@ import {
   getOfflineSystemsCount,
   getTotalDeviceAlerts,
   getTotalSystemsCount,
+  splitName,
 } from "../navigation/utils";
 import styles from "./index.module.css";
 
@@ -228,7 +229,9 @@ export const AlarmRecordCharts: FC = () => {
   const eventResponseTimeData = useMemo(() => {
     return EventReponseTimeChartData?.process.map((item: ChartDataType) => {
       return {
-        name: item.name,
+        name: splitName(item.name)
+          .filter((_, index) => index > 0)
+          .join(" "),
         seconds: item.avgSecond,
       };
     });
@@ -237,7 +240,9 @@ export const AlarmRecordCharts: FC = () => {
   const eventRectificationTimeData = useMemo(() => {
     return EventReponseTimeChartData?.response.map((item: ChartDataType) => {
       return {
-        name: item.name,
+        name: splitName(item.name)
+          .filter((_, index) => index > 0)
+          .join(" "),
         seconds: item.avgSecond,
       };
     });
@@ -258,10 +263,10 @@ export const AlarmRecordCharts: FC = () => {
       objIds: [],
       itemKeys: [],
       itemLevels: [],
-      groupBy: 0,
+      groupBy: 1,
     });
 
-    if ('data' in response) {
+    if ("data" in response) {
       setOffline24Hours(response.data.data);
     }
   };
@@ -275,10 +280,10 @@ export const AlarmRecordCharts: FC = () => {
       objIds: [],
       itemKeys: [],
       itemLevels: [],
-      groupBy: 0,
+      groupBy: 1,
     });
 
-    if ('data' in response) {
+    if ("data" in response) {
       setOffline7Days(response.data.data);
     }
   };
@@ -292,10 +297,10 @@ export const AlarmRecordCharts: FC = () => {
       objIds: [],
       itemKeys: [],
       itemLevels: [],
-      groupBy: 0,
+      groupBy: 1,
     });
 
-    if ('data' in response) {
+    if ("data" in response) {
       setOffline30Days(response.data.data);
     }
   };
@@ -313,7 +318,7 @@ export const AlarmRecordCharts: FC = () => {
       groupBy: 1,
     });
 
-    if ('data' in response) {
+    if ("data" in response) {
       setTop10WeeklyAlertsBySite(response.data.data.data);
     }
   };
@@ -326,7 +331,7 @@ export const AlarmRecordCharts: FC = () => {
       top: 50,
     });
 
-    if ('data' in response) {
+    if ("data" in response) {
       setWeeklyAlertsBySystem(response.data.data.data);
     }
   };
@@ -339,7 +344,7 @@ export const AlarmRecordCharts: FC = () => {
       top: 50,
     });
 
-    if ('data' in response) {
+    if ("data" in response) {
       setWeeklyAlertsbyPriority(response.data.data.data);
     }
   };
@@ -351,7 +356,7 @@ export const AlarmRecordCharts: FC = () => {
       top: 50,
     });
 
-    if ('data' in response) {
+    if ("data" in response) {
       const deviceData = await getTotalDeviceAlerts(response.data.data.data);
       setWeeklyAlertsbyDevices(deviceData);
     }
@@ -365,7 +370,7 @@ export const AlarmRecordCharts: FC = () => {
       top: 50,
     });
 
-    if ('data' in response) {
+    if ("data" in response) {
       setAllWeeklyAlerts(response.data.data.data);
     }
   };
@@ -601,7 +606,11 @@ export const AlarmRecordCharts: FC = () => {
                 darkTheme ? styles.widget_bg : styles.widget_bg_light
               }`}
               dataTestId="weekly-priority-alerts-chart"
-              centerText={offLine24Hours?.length.toString()}
+              centerText={offLine24Hours
+                ?.reduce((total, item) => {
+                  return total + item.count;
+                }, 0)
+                .toString()}
               data={
                 offLine24Hours.map((item: any) => ({
                   value: item.count,
@@ -620,7 +629,11 @@ export const AlarmRecordCharts: FC = () => {
                 darkTheme ? styles.widget_bg : styles.widget_bg_light
               }`}
               dataTestId="weekly-priority-alerts-chart"
-              centerText={offline7Days?.length.toString()}
+              centerText={offline7Days
+                ?.reduce((total, item) => {
+                  return total + item.count;
+                }, 0)
+                .toString()}
               data={
                 offline7Days.map((item: any) => ({
                   value: item.count,
@@ -639,7 +652,11 @@ export const AlarmRecordCharts: FC = () => {
                 darkTheme ? styles.widget_bg : styles.widget_bg_light
               }`}
               dataTestId="weekly-priority-alerts-chart"
-              centerText={offline30Days?.length.toString()}
+              centerText={offline30Days
+                ?.reduce((total, item) => {
+                  return total + item.count;
+                }, 0)
+                .toString()}
               data={
                 offline30Days.map((item: any) => ({
                   value: item.count,

@@ -12,8 +12,15 @@ import {
 } from "@/store/slices/events";
 import { DeviceEvent } from "@/types/device-event";
 import { generateColumns } from "./config";
-import { formatDate, getLastMonthDate, getLastWeekDate } from "@/utils/general-helpers";
-import { useGetFastRecoveryMutation, useQueryeventsiteMutation } from "@/services";
+import {
+  formatDate,
+  getLastMonthDate,
+  getLastWeekDate,
+} from "@/utils/general-helpers";
+import {
+  useGetFastRecoveryMutation,
+  useQueryeventsiteMutation,
+} from "@/services";
 import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 import { APP_DATE_TIME_FORMAT } from "@/const/common";
@@ -33,7 +40,6 @@ type Props = {
   loading: boolean;
 };
 
-
 const { RangePicker } = DatePicker;
 
 export const AlarmSelfRecoveryTable: FC<Props> = ({
@@ -49,13 +55,15 @@ export const AlarmSelfRecoveryTable: FC<Props> = ({
   const dispatch = useDispatch();
   const [messageApi, contextHolder] = message.useMessage();
 
-
   const { startTime, endTime } = useAppSelector(getRecoveryFiltersState);
 
-  const [ getFastRecovery, {isLoading: recoveryLoading} ] = useGetFastRecoveryMutation();
+  const [getFastRecovery, { isLoading: recoveryLoading }] =
+    useGetFastRecoveryMutation();
   const date = new Date();
 
-  const [selectedDates, setSelectedDates] = useState<[dayjs.Dayjs, dayjs.Dayjs]>(() => {
+  const [selectedDates, setSelectedDates] = useState<
+    [dayjs.Dayjs, dayjs.Dayjs]
+  >(() => {
     const today = dayjs();
     const lastMonthDate = dayjs().subtract(1, "month");
     return [lastMonthDate, today];
@@ -68,26 +76,28 @@ export const AlarmSelfRecoveryTable: FC<Props> = ({
   const handleDateChange = (dates: any) => {
     if (dates) {
       setSelectedDates(dates); // Update the state with the selected dates
-      dispatch(setRecoveryFilters({
-            startTime: dates ? formatDate(dates[0].toDate()) : startTime,
-            endTime: dates ? formatDate(dates[1].toDate()) : endTime}
-        ))
+      dispatch(
+        setRecoveryFilters({
+          startTime: dates ? formatDate(dates[0].toDate()) : startTime,
+          endTime: dates ? formatDate(dates[1].toDate()) : endTime,
+        }),
+      );
     }
   };
 
-  const [alertsSite,setAlertsSite]=useState<any[]>([])
+  const [alertsSite, setAlertsSite] = useState<any[]>([]);
   const navigate = useNavigate();
 
   useEffect(() => {
     (async () => {
       const res = await getFastRecovery(body);
-      if ('error' in res) {
+      if ("error" in res) {
         messageApi.open({
           type: "error",
           content: "Request Timeout",
         });
       }
-      if ('data' in res) {
+      if ("data" in res) {
         setAlertsSite(res.data.data.site);
       }
     })();
@@ -113,12 +123,11 @@ export const AlarmSelfRecoveryTable: FC<Props> = ({
 
   const handleProcessAlarm = useCallback(
     (selectedEvent: any) => {
-      
       // dispatch(setSelectedEvents([selectedEvent]));
       // dispatch(setShowProcesslarmModal(true));
-      navigate(`/alarm/self-recovery-site?siteId=${selectedEvent.id}&&title=${selectedEvent.name}`)
-      console.log("selectedEvent",selectedEvent)
-
+      navigate(
+        `/alarm/self-recovery-site?siteId=${selectedEvent.id}&&title=${selectedEvent.name}`,
+      );
     },
     [dispatch],
   );
@@ -131,27 +140,28 @@ export const AlarmSelfRecoveryTable: FC<Props> = ({
   const darkTheme = appTheme === "dark";
 
   return (
-
     <>
-    {contextHolder}
+      {contextHolder}
       <Col span={24}>
-          <div
-            className={styles.container}
-            style={{marginBottom: 20}}
-            data-testid="alarm-record-grid-search"
-          >
-            <RangePicker
-              showTime={{ format: "HH:mm" }}
-              format={APP_DATE_TIME_FORMAT}
-              className={`date_input_alarm ${darkTheme ? "date_input_alarm_bg":""}`}
-              style={{ flex: 1 }}
-              value={selectedDates} // Set default values
-              onChange={handleDateChange}
-            />
-          </div>
-        </Col>
+        <div
+          className={styles.container}
+          style={{ marginBottom: 20 }}
+          data-testid="alarm-record-grid-search"
+        >
+          <RangePicker
+            showTime={{ format: "HH:mm" }}
+            format={APP_DATE_TIME_FORMAT}
+            className={`date_input_alarm ${
+              darkTheme ? "date_input_alarm_bg" : ""
+            }`}
+            style={{ flex: 1 }}
+            value={selectedDates} // Set default values
+            onChange={handleDateChange}
+          />
+        </div>
+      </Col>
       <Table
-        rowKey="eventId"
+        rowKey="id"
         className={className}
         scroll={{ x: 1200 }}
         sticky={true}

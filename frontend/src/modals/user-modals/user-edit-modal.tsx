@@ -107,7 +107,7 @@ const OrganizationsSelect = ({
     const res = await getUserAllowedSites({ userGuid: user?.userGuid });
     if ("data" in res && res.data) {
       setAllowedSites(
-        res.data.filter.map((item: any) => {
+        (res.data.filter || []).map((item: any) => {
           return item.orgId;
         }),
       );
@@ -311,7 +311,7 @@ export const EditUserModal: FC<Props> = ({
 
       const result = await registerUser(userData);
 
-      if ('data' in result && !result?.data?.error) {
+      if ("data" in result && !result?.data?.error) {
         await postSingleUserPermission({
           userGuid: user?.userGuid,
           userName: data.userName,
