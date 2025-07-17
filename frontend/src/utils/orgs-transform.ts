@@ -1,4 +1,8 @@
-import { Organisation, OrganisationGroup } from "@/types/organisation";
+import {
+  Organisation,
+  OrganisationGroup,
+  OrganisationSite,
+} from "@/types/organisation";
 import { organizeOrgs } from "./organizeOrgs";
 
 interface GroupNode extends OrganisationGroup {
@@ -48,6 +52,7 @@ const buildGroupHierarchy = (groups: OrganisationGroup[]): GroupNode[] => {
   groupArray.forEach((group) => {
     if (group.parentId) {
       const parent = groupArray.find((g) => g.id === group.parentId);
+
       if (parent) {
         parent.children = parent.children || [];
         parent.children.push({ ...group, isGroup: false, isSite: true });
@@ -58,9 +63,7 @@ const buildGroupHierarchy = (groups: OrganisationGroup[]): GroupNode[] => {
   return rootGroups;
 };
 
-const getGroupsAndSite = (
-  groups: GroupNodeWithChildren[],
-): GroupOrSiteNode[] => {
+const getGroupsAndSite = (groups: any[]): GroupOrSiteNode[] => {
   return groups.map((group: GroupNodeWithChildren) => {
     // Initialize children array
     const children: GroupOrSiteNode[] = [];
@@ -98,18 +101,21 @@ export const TransformOrgs = (data: Organisation[]): GroupOrSiteNode[] => {
     const children: GroupOrSiteNode[] = [];
 
     // Add groups and their nested children
-    if (org.groups) {
-      children.push(...buildGroupHierarchy(org.groups));
+    if (org?.groups) {
+      // children.push(...buildGroupHierarchy(org.groups));
+      children.push(...getGroupsAndSite(org?.groups));
     }
 
     // Add standalone sites
     if (org?.sites) {
+      // org?.groups?.map((group) => {
       children.push(
+        // ...(group?.sites || []).map(
         ...org.sites.map(
           (site) =>
             ({
               key: `site-${site.id}`,
-              id: site.id,
+              id: site?.id,
               checkId: `${org.id}-${site.id}`,
               name: site.name,
               boxType: site.boxType,
@@ -120,6 +126,7 @@ export const TransformOrgs = (data: Organisation[]): GroupOrSiteNode[] => {
             }) as SiteNode,
         ),
       );
+      // });
     }
 
     // Return the organisation structure

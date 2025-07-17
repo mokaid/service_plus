@@ -1,13 +1,15 @@
 import { Button, Col, Row, Space, Spin, Table } from "antd";
-import { type FC, useContext, useState } from "react";
+import { type FC, useContext, useState, useEffect } from "react";
 import { ThemeContext } from "@/theme";
 import { Breadcrumbs } from "@/breadcrumbs";
 import { LoadingOutlined, PlusOutlined } from "@ant-design/icons";
 import { AddUserModal, EditUserModal } from "@/modals/user-modals";
-import { useGetAllUsersQuery, useGetUsersQuery } from "@/services";
+import { useGetUsersQuery } from "@/services";
 import { generateColumns } from "./components/config";
 import { User } from "@/types/user";
 import { useAppSelector } from "@/hooks/use-app-selector";
+import { useNavigate } from "react-router-dom";
+import { hasPermission } from "@/utils/userPermissions";
 
 export const Users: FC = () => {
   const { appTheme } = useContext(ThemeContext);
@@ -18,6 +20,13 @@ export const Users: FC = () => {
   const { isLoading, refetch, currentData } = useGetUsersQuery({});
 
   const user = useAppSelector((state) => state.authState.user);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (user && !hasPermission(user, "users", "v")) {
+      navigate("/dashboard", { replace: true });
+    }
+  }, [user, navigate]);
 
   // const {
   //   isLoading: allUsersLoader,
@@ -37,7 +46,7 @@ export const Users: FC = () => {
         <Col span={24}>
           <Breadcrumbs />
         </Col>
-        {user?.role === 0 && (
+        {user?.role === 99 && !user?.permission && (
           <Col span={24}>
             <Space>
               <Button

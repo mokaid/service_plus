@@ -16,7 +16,7 @@ const items: TabsProps["items"] = [
     key: "grid",
     label: "Grid",
     // children: <AlarmRecordGrid />,
-    children: <AllAlerts />,
+    children: <AllAlerts recordTable={true} />,
   },
   {
     key: "chart",

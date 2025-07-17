@@ -8,9 +8,12 @@ import {
   useDeleteMaskedItemMutation,
   useGetMaskedItemMutation,
   useGetSitesQuery,
+  useGetUserAllowedSitesMutation,
 } from "@/services";
 import { LoadingOutlined } from "@ant-design/icons";
 import { generateColumns } from "./config";
+import { useAppSelector } from "@/hooks/use-app-selector";
+import { RootState } from "@/types/store";
 
 type Props = {
   className: string;
@@ -21,14 +24,66 @@ export const MaskedSourceTable: FC<Props> = ({ className, dataTestId }) => {
   const dispatch = useAppDispatch();
   const [pageIndex, setPageIndex] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+  const [allowedMaskedSites, setAllowedMaskedSites] = useState<any[]>([]);
+
+  const user = useAppSelector((state: RootState) => state?.authState?.user);
+
+  //Masked Items
   const [getMaskedItems, { isLoading, data }] = useGetMaskedItemMutation();
+
+  //USER ALLOWED SITES
+  const [getUserAllowedSites] = useGetUserAllowedSitesMutation();
+
+  const handleAllowedMaskedSites = async () => {
+    const res = await getUserAllowedSites({ userGuid: user?.userGuid });
+
+    if ("data" in res) {
+      const currentData = await getMaskedItems({ pageSize, pageIndex });
+      const filteredSites: any[] = [];
+
+      (currentData as any)?.data?.data?.list?.forEach((item: any) => {
+        res?.data?.filter.forEach((sites: any) => {
+          const splittedValue = sites.orgId.split("0")[0];
+          let newSiteId;
+          if (splittedValue.length === 2) {
+            newSiteId = `0${sites?.orgId}`;
+          } else {
+            newSiteId = `00${sites?.orgId}`;
+          }
+
+          if (newSiteId) {
+            if (newSiteId === item?.siteId) {
+              filteredSites.push(item);
+            } else {
+              return;
+            }
+          }
+        });
+      });
+
+      setAllowedMaskedSites(filteredSites);
+    }
+  };
+
+  //Query Sites
   const { currentData: sites } = useGetSitesQuery({});
 
   const [messageApi, messageContext] = message.useMessage();
   const [deleteMaskedItem] = useDeleteMaskedItemMutation();
 
+  const getMaskedItemsData = () => {
+    if (user?.role === 99 && user?.permission) {
+      handleAllowedMaskedSites();
+    } else {
+      (async () => {
+        const res = await getMaskedItems({ pageSize, pageIndex });
+        setAllowedMaskedSites((res as any)?.data?.data?.list);
+      })();
+    }
+  };
+
   useEffect(() => {
-    getMaskedItems({ pageSize, pageIndex });
+    getMaskedItemsData();
   }, [pageSize, pageIndex]);
 
   const handleProcessAlarm = useCallback(
@@ -36,6 +91,7 @@ export const MaskedSourceTable: FC<Props> = ({ className, dataTestId }) => {
       const response = await deleteMaskedItem(data);
       if ("data" in response && response.data.error == 0) {
         messageApi.success("Recovery Successful");
+        getMaskedItemsData();
       } else if ("error" in response) {
         messageApi.error("There was an error");
       }
@@ -63,7 +119,7 @@ export const MaskedSourceTable: FC<Props> = ({ className, dataTestId }) => {
         rowKey="siteId"
         className={className}
         scroll={{ x: 1200 }}
-        dataSource={data ? data?.data?.list : []}
+        dataSource={allowedMaskedSites}
         sticky={true}
         columns={columns}
         showSorterTooltip={false}

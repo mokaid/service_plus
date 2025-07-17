@@ -4,7 +4,7 @@ const AccountType = ({ user }: { user: any }) => {
   var type = "Admin";
   var color = "blue";
 
-  if (user?.role === 99) {
+  if (user?.role === 99 && user?.permission) {
     type = "Customer";
     color = "gold";
   } else if (user?.role === 33) {

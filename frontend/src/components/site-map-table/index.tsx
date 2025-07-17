@@ -30,7 +30,7 @@ type Props = {
   totalAlerts: number;
   handlePageChange: () => void;
   loading: boolean;
-  sites: OrganisationSite[]
+  sites: OrganisationSite[];
 };
 export const SiteMapTable: FC<Props> = ({
   className,
@@ -65,7 +65,7 @@ export const SiteMapTable: FC<Props> = ({
   };
 
   const columns = generateColumns({
-    onClick: handleSiteInfo
+    onClick: handleSiteInfo,
   });
 
   const antIcon = <LoadingOutlined style={{ fontSize: 24 }} spin />;

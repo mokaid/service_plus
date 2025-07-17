@@ -13,7 +13,7 @@ import { Organisation } from "@/types/organisation";
 type Props = {
   className: string;
   dataTestId: string;
-  data: { error: number; orgs: Organisation[]; total?: number } | undefined;
+  data: any[];
   pageIndex: number;
   pageSize: number;
   isLoading: boolean;
@@ -79,14 +79,13 @@ export const SiteConfigurationTable: FC<Props> = ({
   });
 
   const antIcon = <LoadingOutlined style={{ fontSize: 24 }} spin />;
-
   return (
     <>
       <Table
         bordered
         rowKey="key"
         className={className}
-        dataSource={data && data?.error == 0 ? TransformOrgs(data?.orgs) : []}
+        dataSource={data && data ? TransformOrgs(data) : []}
         sticky={true}
         columns={columns}
         showSorterTooltip={false}

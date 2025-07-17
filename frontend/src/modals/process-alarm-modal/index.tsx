@@ -31,6 +31,7 @@ import {
   useDeleteMaskedItemMutation,
   useMaskItemMutation,
   usePostProcessSingleEventMutation,
+  useProcessEventMutation,
 } from "@/services";
 import styles from "./index.module.css";
 
@@ -44,6 +45,8 @@ import { useSelector } from "react-redux";
 type Props = {
   dataTestId?: string;
   refetch: MutationTrigger<MutationDefinition<any, any, any, any, any>>;
+  setRefetch?: React.Dispatch<React.SetStateAction<boolean>>;
+  recordTable?: boolean;
 };
 
 type Fields = {
@@ -67,12 +70,18 @@ const processStatusOptions = [
   { label: "Accomplished", value: ProcessStatus.Accomplished },
 ];
 
-export const ProcessAlarmModal: FC<Props> = ({ dataTestId, refetch }) => {
+export const ProcessAlarmModal: FC<Props> = ({
+  dataTestId,
+  refetch,
+  setRefetch,
+  recordTable,
+}: Props) => {
   // const [handleProcessEvents, {}] = useProcessEventMutation();
   const dispatch = useAppDispatch();
   const [form] = Form.useForm<Fields>();
   const show = useAppSelector(getShowProcessAlarmModalState);
   const [selectedEvent] = useAppSelector(getSelectedEvents);
+  const [notes, setNotes] = useState<string>("");
 
   const processTime = selectedEvent?.process?.time ? (
     <Typography.Text type="success">
@@ -85,8 +94,10 @@ export const ProcessAlarmModal: FC<Props> = ({ dataTestId, refetch }) => {
   const [messageApi, contextHolder] = message.useMessage();
   const { appTheme } = useContext(ThemeContext);
   const darkTheme = appTheme === "dark";
-  const [handlePostProcessSingleEvents, {}] =
-    usePostProcessSingleEventMutation();
+  // const [handlePostProcessSingleEvents, {}] =
+  //   usePostProcessSingleEventMutation();
+
+  const [handleProcessEvents, {}] = useProcessEventMutation();
 
   const handleClose = () => {
     dispatch(setShowProcesslarmModal(false));
@@ -151,32 +162,31 @@ export const ProcessAlarmModal: FC<Props> = ({ dataTestId, refetch }) => {
 
   const onSubmit = async () => {
     setIsLoading(true);
-    // const { caseNumber, processStatus, remarks } = form.getFieldsValue();
-    const event = {
-      eventId: selectedEvent.eventId,
-      process: {
-        ...selectedEvent.process,
-        actionType: "Acknowledge with no Action",
-      },
-      // caseNumber: caseNumber,
-      // remarks: remarks,
-      // processStatus,
+    const { caseNumber, processStatus, remarks } = form.getFieldsValue();
+    const body: any = {
+      event: [selectedEvent.eventId],
+      caseNumber: caseNumber,
+      remarks: remarks,
+      processStatus,
+      actionType: "Acknowledge with no Action",
     };
-    const body = {
-      event,
-    };
-    const res = await handlePostProcessSingleEvents(body);
+
+    const res = await handleProcessEvents(body);
     if (res) {
       setIsLoading(false);
       dispatch(setShowProcesslarmModal(false));
       if ("data" in res && res.data.error === 0) {
         refetch({
           ...filters,
+          processed: recordTable ? -1 : 0,
         });
+        setRefetch?.(true);
+
         messageApi.open({
           type: "success",
           content: "Process status updated",
         });
+        setNotes("");
       } else {
         messageApi.open({
           type: "error",
@@ -185,6 +195,7 @@ export const ProcessAlarmModal: FC<Props> = ({ dataTestId, refetch }) => {
       }
     }
   };
+
   const antIcon = (
     <LoadingOutlined style={{ fontSize: "16px", color: "white" }} spin />
   );
@@ -258,6 +269,8 @@ export const ProcessAlarmModal: FC<Props> = ({ dataTestId, refetch }) => {
               <TextArea
                 autoSize={{ minRows: 4, maxRows: 6 }}
                 maxLength={256}
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
                 showCount={true}
                 placeholder="Process notes"
                 className={darkTheme ? styles.testingTextarea : ""}

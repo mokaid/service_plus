@@ -3,7 +3,11 @@ import { ActionList } from "@/components/action-list";
 import { GoogleMapControl } from "@/components/google-map-control";
 import { Widget } from "@/components/widget";
 import { GOOGLE_MAP_API_KEY } from "@/const/google-maps";
-import { useGetEventTopDataMutation, useGetSitesQuery } from "@/services";
+import {
+  useGetEventTopDataMutation,
+  useGetSitesQuery,
+  useGetUserAllowedSitesMutation,
+} from "@/services";
 import { filters, setFilters } from "@/store/slices/filters";
 import { setSelectedSite } from "@/store/slices/sites";
 import { ThemeContext } from "@/theme";
@@ -19,11 +23,20 @@ import { Badge, Button, Empty, Input, Spin, Typography } from "antd";
 import ErrorBoundary from "antd/es/alert/ErrorBoundary";
 import clsx from "clsx";
 import moment from "moment";
-import { useCallback, useContext, useEffect, useState, type FC } from "react";
-import { useDispatch } from "react-redux";
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type FC,
+} from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { ALERTS_MAP_CONFIG } from "./config";
 import styles from "./index.module.css";
+import { useAppSelector } from "@/hooks/use-app-selector";
+import { RootState } from "@/types/store";
 
 type Props = {
   className?: string;
@@ -56,15 +69,29 @@ export const AlertsMap: FC<Props> = ({
   const [_, setMap] = useState<google.maps.Map | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredAlertData, setFilteredAlertData] = useState<AlertData[]>([]);
-  const [top10WeeklyAlertsbySite, setTop10WeeklyAlertsBySite] = useState([]);
-  const [top10SevenAlerts, setTop10SevenAlerts] = useState([]);
+  const [top10WeeklyAlertsbySite, setTop10WeeklyAlertsBySite] = useState<any[]>(
+    [],
+  );
+  const [top10SevenAlerts, setTop10SevenAlerts] = useState<any[]>([]);
+  const user = useAppSelector((state: RootState) => state.authState.user);
+
+  const [getUserAllowedSites] = useGetUserAllowedSitesMutation();
 
   //Get Event Top Data
-  const [getChartTop10Events] = useGetEventTopDataMutation();
+  const [getChartTop10Events, { data: currentData }] =
+    useGetEventTopDataMutation();
 
   const { currentData: sites } = useGetSitesQuery({});
 
   const getTop10WeeklyAlertsBySite = async () => {
+    await getChartTop10Events({
+      startTime: formatDate(getLastWeekDate(new Date())),
+      endTime: formatDate(new Date()),
+      groupBy: 5,
+    });
+  };
+
+  const getAlertsForAllUsers = async () => {
     const response = await getChartTop10Events({
       startTime: formatDate(getLastWeekDate(new Date())),
       endTime: formatDate(new Date()),
@@ -73,11 +100,53 @@ export const AlertsMap: FC<Props> = ({
 
     setTop10WeeklyAlertsBySite((response as any)?.data?.data?.data);
     setTop10SevenAlerts(
-      (response as any)?.data?.data?.data.filter(
+      (response as any)?.data?.data?.data?.filter(
         (_: any, index: number) => index < 7,
       ),
     );
   };
+
+  const handleAllowedSites = async () => {
+    const res = await getUserAllowedSites({ userGuid: user?.userGuid });
+
+    if ("data" in res) {
+      const filteredSites: any[] = [];
+      currentData?.data?.data?.forEach((item: any) => {
+        const splittedId = item?.name?.split(" ")[0];
+        res?.data?.filter?.forEach((sites: any) => {
+          const splittedValue = sites?.orgId?.split("0")[0];
+          let newSiteId;
+          if (splittedValue.length === 2) {
+            newSiteId = `0${sites?.orgId}`;
+          } else {
+            newSiteId = `00${sites?.orgId}`;
+          }
+
+          if (newSiteId) {
+            if (newSiteId === splittedId) {
+              filteredSites.push(item);
+            } else {
+              return;
+            }
+          }
+        });
+      });
+
+      setTop10WeeklyAlertsBySite(filteredSites);
+      setTop10SevenAlerts(filteredSites);
+    }
+  };
+
+  const filters = useSelector((state: RootState) => state.filters);
+
+  useEffect(() => {
+    getTop10WeeklyAlertsBySite();
+    if (user?.role === 99 && user?.permission) {
+      handleAllowedSites();
+    } else {
+      getAlertsForAllUsers();
+    }
+  }, [user]);
 
   const handleRemoveFilter = () => {
     dispatch(setSelectedSite(null));
@@ -95,10 +164,6 @@ export const AlertsMap: FC<Props> = ({
   };
 
   useEffect(() => {
-    getTop10WeeklyAlertsBySite();
-  }, []);
-
-  useEffect(() => {
     let manipulatedData: any[] = data;
     const selectedSiteId = selectedSite?.split(" ")[0];
 
@@ -111,7 +176,7 @@ export const AlertsMap: FC<Props> = ({
       const siteId = selectedSiteId ? selectedSiteId : alert?.site?.id;
 
       const site = sites?.find((s: any) => s.id === siteId);
-      const top10WeeklyAlertsBySite = top10WeeklyAlertsbySite.find(
+      const top10WeeklyAlertsBySite = top10WeeklyAlertsbySite?.find(
         (s: any) => s.name.split(" ")[0] === alert?.site?.id,
       );
 
@@ -142,7 +207,7 @@ export const AlertsMap: FC<Props> = ({
 
   const handleMapLoad = useCallback(
     (mapInstance: google.maps.Map) => {
-      if (filteredAlertData.length > 0) {
+      if (filteredAlertData?.length > 0) {
         setMap(mapInstance);
       }
     },
@@ -167,6 +232,20 @@ export const AlertsMap: FC<Props> = ({
       }),
     );
   };
+
+  const selectedSites = useMemo(() => {
+    let sitesArray: any[] = [];
+    const filterSites = top10WeeklyAlertsbySite.forEach((item: any) => {
+      const splitted = item?.name.split(" ")[0];
+      filters?.sites?.forEach((site: any) => {
+        if (site === splitted) {
+          sitesArray.push(item?.name);
+        }
+      });
+    });
+
+    return sitesArray;
+  }, [top10WeeklyAlertsbySite, filters]);
 
   return (
     <div className={clsx(className, styles.container)} data-testid={dataTestId}>
@@ -227,7 +306,12 @@ export const AlertsMap: FC<Props> = ({
                   key={site.name}
                   extra={
                     <Typography.Text
-                      type={selectedSite == site.name ? "success" : "secondary"}
+                      type={
+                        selectedSite == site.name ||
+                        selectedSites.includes(site?.name)
+                          ? "success"
+                          : "secondary"
+                      }
                     >
                       {site.count}
                     </Typography.Text>
@@ -236,7 +320,12 @@ export const AlertsMap: FC<Props> = ({
                 >
                   <Badge status="success" />{" "}
                   <Typography.Text
-                    type={selectedSite == site.name ? "success" : "secondary"}
+                    type={
+                      selectedSite == site.name ||
+                      selectedSites.includes(site?.name)
+                        ? "success"
+                        : "secondary"
+                    }
                   >
                     {site.name}
                   </Typography.Text>

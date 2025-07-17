@@ -58,18 +58,17 @@ export const AlarmSelfRecoverySiteTable: FC<Props> = ({
 
   //USER ALLOWED SITES
   const [getUserAllowedSites] = useGetUserAllowedSitesMutation();
-  const handleAllowedSites = async () => {
-    const res = await getUserAllowedSites({ userGuid: undefined });
-    if ("data" in res) {
-      setAllowedSites(
-        (res.data.filter || []).map((item: { orgId: string }) => {
-          return item.orgId;
-        }),
-      );
-    }
-  };
+  // const handleAllowedSites = async () => {
+  //   const res = await getUserAllowedSites({ userGuid: undefined });
+  //   if ("data" in res) {
+  //     setAllowedSites(
+  //       (res.data.filter || []).map((item: { orgId: string }) => {
+  //         return item.orgId;
+  //       }),
+  //     );
+  //   }
+  // };
   useEffect(() => {
-    handleAllowedSites();
     (async () => {
       await getEvents({
         // ...filters,

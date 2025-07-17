@@ -12,6 +12,7 @@ export type User = {
   permission?: string;
   filter: string;
   role: number;
+  sysRole?: number;
   /**
    * 0 - Deactive,
    * 1 - Active

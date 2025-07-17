@@ -221,11 +221,12 @@ export const AddUserModal: FC<Props> = ({ Show, setAddUser, refetch }) => {
 
       const result = await registerUser(userData);
 
-      if ('data' in result && !result?.data?.error) {
+      if ("data" in result && !result?.data?.error) {
         await postSingleUserPermission({
           userGuid: result?.data?.userGuid,
           userName: data.userName,
-          role: data.role === "user" ? 33 : 99,
+          sysRole:
+            data.role === "user" ? 33 : data?.role === "customer" ? 99 : 0,
           permission: permissionEncode(selectedPermissions),
         });
 
@@ -234,6 +235,10 @@ export const AddUserModal: FC<Props> = ({ Show, setAddUser, refetch }) => {
             userGuid: result?.data?.userGuid,
             filter: [{ orgId: data.organization }, ...filterSitesAndOrgsId],
           });
+        } else {
+          const res = await postUserFilter({
+            userGuid: result?.data?.userGuid,
+          });
         }
 
         messageApi.success(`User has been added successfully !`);
@@ -241,10 +246,12 @@ export const AddUserModal: FC<Props> = ({ Show, setAddUser, refetch }) => {
         // await updatePermissions(userUpdateData);
         refetch();
         handleCancel();
+      } else {
+        handleCancel();
+        messageApi.error("There was an error");
       }
     } catch (error) {
       console.log(error);
-      messageApi.error("There was an error");
     }
   };
 

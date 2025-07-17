@@ -4,12 +4,12 @@ import { getLastPathSegment } from "../../utils/helper.js";
 import { getUserPostData } from "../../utils/userPostData.js";
 
 export const userRoutes = async (app) => {
-  app.get("/users", async (request, reply) => {
-    // console.log(request?.param, "request");
+  //Get All Users
 
+  app.get("/users", async (request, reply) => {
     try {
       const requestData = {
-        msgType: "getuserlist",
+        msgType: getLastPathSegment(ENDPOINTS.GET_ALL_USERS),
         _sender: "",
         org: request?.query.orgId ? [String(request.query.orgId)] : ["0"],
         _sendTime: new Date().toISOString().replace("T", " ").substring(0, 23),
@@ -35,18 +35,20 @@ export const userRoutes = async (app) => {
     }
   });
 
+  // Get All User Permmission List
+
   app.get("/getAllUsers", async (request, reply) => {
     try {
       const requestData = {
         _sender: "",
         _sendTime: new Date().toISOString().replace("T", " ").substring(0, 23),
-        msgType: "GetUserPermissionList",
+        msgType: getLastPathSegment(ENDPOINTS.GET_ALL_USERS_PERMISSIONS),
         pageIndex: 1,
         pageSize: 4,
       };
 
       const response = await axiosInstance.post(
-        `/${ENDPOINTS.GET_ALL_USERS}`,
+        `/${ENDPOINTS.GET_ALL_USERS_PERMISSIONS}`,
         requestData,
         {
           headers: {
@@ -62,6 +64,8 @@ export const userRoutes = async (app) => {
       throw error;
     }
   });
+
+  //Get User
 
   app.get("/user", async (request, reply) => {
     try {
@@ -87,13 +91,13 @@ export const userRoutes = async (app) => {
     }
   });
 
+  //Post User Allowed Sites
+
   app.post("/postUserFilter", async (request, reply) => {
     try {
-      // const userData = await getUserPostData(request?.body);
       const requestData = {
-        msgType: "postuserfilter",
+        msgType: getLastPathSegment(ENDPOINTS.POST_USER_FILTER),
         ...request?.body,
-        // ...userData,
       };
 
       const response = await axiosInstance.post(
@@ -114,10 +118,12 @@ export const userRoutes = async (app) => {
     }
   });
 
+  //Delete User
+
   app.post("/deleteUser", async (request, reply) => {
     try {
       const requestData = {
-        msgType: "deleteUser",
+        msgType: getLastPathSegment(ENDPOINTS.DELETE_USER),
         ...request?.body,
       };
 
@@ -140,10 +146,12 @@ export const userRoutes = async (app) => {
     }
   });
 
+  //Post User Permission List
+
   app.post("/postUserPermissionList", async (request, reply) => {
     try {
       const requestData = {
-        msgType: "postuserpermission",
+        msgType: getLastPathSegment(ENDPOINTS.POST_USER_PERMISSION),
         ...request?.body,
       };
       const response = await axiosInstance.post(
@@ -164,10 +172,12 @@ export const userRoutes = async (app) => {
     }
   });
 
+  //Get User Permission List
+
   app.get("/getUserPermissionList", async (request, reply) => {
     try {
       const requestData = {
-        msgType: "getuserpermissionlist",
+        msgType: getLastPathSegment(ENDPOINTS.GET_USER_PERMISSON_LIST),
         ...request?.body,
       };
       const response = await axiosInstance.post(
@@ -188,10 +198,12 @@ export const userRoutes = async (app) => {
     }
   });
 
+  //Get Single user Permission
+
   app.post("/getSingleUserPermission", async (request, reply) => {
     try {
       const requestData = {
-        msgType: "getuserpermission",
+        msgType: getLastPathSegment(ENDPOINTS.GET_SINGLE_USER_PERMISSION),
         ...request?.body,
       };
       const response = await axiosInstance.post(
@@ -212,10 +224,12 @@ export const userRoutes = async (app) => {
     }
   });
 
+  //Get user Allowed Sites
+
   app.post("/getUserAllowedSites", async (request, reply) => {
     try {
       const requestData = {
-        msgType: "getuserfilter",
+        msgType: getLastPathSegment(ENDPOINTS.GET_USER_ALLOWED_SITES),
         ...request?.body,
       };
       const response = await axiosInstance.post(
@@ -236,10 +250,12 @@ export const userRoutes = async (app) => {
     }
   });
 
+  //Post Single User Permission
+
   app.post("/postSingleUserPermission", async (request, reply) => {
     try {
       const requestData = {
-        msgType: "postuserpermission",
+        msgType: getLastPathSegment(ENDPOINTS.POST_SINGLE_USER_PERMISSION),
         ...request?.body,
       };
       const response = await axiosInstance.post(

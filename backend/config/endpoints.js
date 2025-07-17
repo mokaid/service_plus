@@ -12,7 +12,7 @@ export const ENDPOINTS = {
   PROCESS_EVENT: "sp/api/PostBatchProcessEvents/",
   REGISTER_BOX: "sp/api/PostRegisterBox/",
   DELETE_SITE: "sp/api/DeleteBox/",
-  UPDATE_IO_EVENTS: "updateioeventstext",
+  UPDATE_IO_EVENTS: "sp/api/PostIoEventsText/",
   GET_BOX_STATUS: "sp/api/GetBoxProperty/",
   GET_IO_EVENTS: "sp/api/GetIoEventsText/",
   GET_MASKED_ITEM: "sp/api/GetMaskedItemKey/",
@@ -20,7 +20,7 @@ export const ENDPOINTS = {
   UPGRADE_BOX_FIRMWARE: "sp/api/PostUpgradeBoxFirmware",
   DELETE_MASKED_ITEM: "sp/api/DeleteMaskedItemKey/",
   FAST_RECOVERY: "sp/api/GetEventsCountbySite/",
-  CONFIGURE_BOX: "sp/api/PostConfigureBox/",
+  POST_CONFIGURE_BOX: "sp/api/PostConfigureBox/",
   GET_SYSTEMS: "sp/api/GetSiteSystem/",
   GET_DEVICES: "sp/api/GetSiteSystemObject/",
   GET_EVENT_CATEGORIES: "sp/api/GetSiteSystemObjectItem/",
@@ -32,7 +32,7 @@ export const ENDPOINTS = {
   GET_CHART_EVENTS_RESPONSE_TIME: "sp/api/GetEventsResponseTime/",
   GET_CHART_EVENTS_COUNT_BY_STATUS: "sp/api/GetEventsCountbyStatus/",
   GET_EVENT_TOP_DATA: "sp/api/GetEventDataTop/",
-  GET_ALL_USERS: "sp/api/GetUserPermissionList/",
+  GET_ALL_USERS_PERMISSIONS: "sp/api/GetUserPermissionList/",
   REGISTER_USER: "sp/s/postUser", // ADD/EDIT USER
   GET_ALL_USERS: "sp/s/getUserList",
   POST_USER_PERMISSION: "sp/api/postUserPermission",
@@ -41,4 +41,6 @@ export const ENDPOINTS = {
   GET_USER_ALLOWED_SITES: "sp/api/GetUserFilter/",
   POST_USER_FILTER: "sp/api/PostUserFilter/",
   POST_SINGLE_USER_PERMISSION: "sp/api/PostUserPermission/",
+  GET_BOX_PROPERTY: "sp/api/GetBoxProperty/",
+  POST_ORG_CONTACTS: "sp/api/PostOrgContacts/",
 };

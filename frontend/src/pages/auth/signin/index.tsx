@@ -10,19 +10,27 @@ import {
   EyeOutlined,
 } from "@ant-design/icons";
 import { useEffect, useRef, useState } from "react";
-// import { useNavigate } from "react-router-dom";
-import { useLoginMutation } from "@/services";
+import {
+  useGetSingleUserPermissionMutation,
+  useLoginMutation,
+} from "@/services";
 import { setUserCredentials } from "@/store/slices/authSlice";
 import { useAppDispatch } from "@/hooks/use-app-dispatch";
 import { useAppSelector } from "@/hooks/use-app-selector";
 import { Navigate, useLocation } from "react-router-dom";
-import { getRandomNumber } from "@/utils/general-helpers";
-import { RootState } from "@/types/store";
 
 function SignIn() {
   const token = useAppSelector((state) => state.authState.token);
   const location = useLocation();
+
+  //Login API
   const [loginRequest, { isLoading, data }] = useLoginMutation();
+
+  //Get User Permission Api
+  const [
+    userPermissionRequest,
+    { isLoading: permissionLaoder, data: userPermissionsData },
+  ] = useGetSingleUserPermissionMutation();
 
   const [showPassword, setShowPassword] = useState(false);
   const [messageApi, contextHolder] = message.useMessage();
@@ -53,14 +61,51 @@ function SignIn() {
         type: "success",
         content: "You logged in successfully!",
       });
+      // const res = userPermissionRequest({
+      //   userGuid: data?.user?.userGuid,
+      // })
+      //   .unwrap()
+      //   .then((payload) => {
+      //     dispatch(
+      //       setUserCredentials({
+      //         user: payload?.user,
+      //         token: data?.token,
+      //       }),
+      //     );
+      //   });
       dispatch(
         setUserCredentials({
-          user: data.user,
-          token: data.token,
+          user: data?.user,
+          token: data?.token,
         }),
       );
     }
   }, [data]);
+
+  // const handleLogin = async (formData: any) => {
+  //   try {
+  //     const loginResponse = await loginRequest(formData);
+
+  //     if (loginResponse?.data?.error === 0) {
+  //       messageApi.open({
+  //         type: "success",
+  //         content: "You logged in successfully!",
+  //       });
+  //       const userPermissionResponse = await userPermissionRequest({
+  //         userGuid: loginResponse?.data?.user?.userGuid,
+  //       });
+
+  //       dispatch(
+  //         setUserCredentials({
+  //           user: userPermissionRequest?.data?.user,
+  //           token: loginResponse?.data?.token,
+  //         }),
+  //       );
+  //     }
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // };
 
   const xOffset = 5;
 
@@ -81,7 +126,7 @@ function SignIn() {
             <Logo className={styles.logo} />
             <img className={styles.img} src={datareport} alt={"Data report"} />
             <div className={styles.input_container}>
-              <label>Username</label>
+              <label style={{ color: "white" }}>Username</label>
               <Form.Item
                 name={"userName"}
                 rules={[
@@ -93,13 +138,14 @@ function SignIn() {
               >
                 <Input
                   placeholder=""
+                  style={{ color: "white" }}
                   className={styles.input_bg}
-                  suffix={<CloseCircleOutlined />}
+                  suffix={<CloseCircleOutlined style={{ color: "white" }} />}
                 />
               </Form.Item>
             </div>
             <div className={styles.input_container}>
-              <label>Password</label>
+              <label style={{ color: "white" }}>Password</label>
               <Form.Item
                 name={"password"}
                 rules={[
@@ -117,10 +163,12 @@ function SignIn() {
                     showPassword ? (
                       <EyeOutlined
                         onClick={() => setShowPassword(!showPassword)}
+                        style={{ color: "white" }}
                       />
                     ) : (
                       <EyeInvisibleOutlined
                         onClick={() => setShowPassword(!showPassword)}
+                        style={{ color: "white" }}
                       />
                     )
                   }
@@ -151,6 +199,7 @@ function SignIn() {
                 ) {
                   setShowPuzzle(false);
                   loginRequest(formData);
+                  // await handleLogin(formData);
                   return Promise.resolve();
                 }
 

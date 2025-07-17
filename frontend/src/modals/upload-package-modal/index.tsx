@@ -17,6 +17,8 @@ import {
 } from "antd";
 import { useContext, useState, FC } from "react";
 import styles from "./index.module.css";
+import { useAppSelector } from "@/hooks/use-app-selector";
+import { RootState } from "@/types/store";
 
 type Props = {
   show: boolean;
@@ -41,6 +43,7 @@ export const UploadPackageModal: FC<Props> = ({ show, setShow, refetch }) => {
   const [form] = Form.useForm<Fields>();
   const [fileList, setFileList] = useState<any[]>([]); // State to manage uploaded files
   const [uploadPackage, { data: packageData, isLoading }] = useUploadMutation();
+  const user = useAppSelector((state: RootState) => state.authState.user);
 
   const handleClose = () => {
     form.resetFields();
@@ -60,13 +63,14 @@ export const UploadPackageModal: FC<Props> = ({ show, setShow, refetch }) => {
     formData.append("packageType", data.packageType.toString());
     formData.append("version", data.version);
     formData.append("file", fileList[0]); // Assuming only a single file upload
+    formData.append("userId", user?.userGuid || "");
 
     try {
       const response = await uploadPackage(formData);
 
-      if ('data' in response && !response?.data?.error) {
+      if ("data" in response && !response?.data?.error) {
         message.success("Package uploaded successfully.");
-      } else if ('error' in response) {
+      } else if ("error" in response) {
         message.error(`${response?.error?.data?.desc}`);
       }
       refetch();

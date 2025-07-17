@@ -39,9 +39,15 @@ type Props = {
   className?: string;
   dataTestId?: string;
   sites: OrganisationSite[];
+  allowedSites: OrganisationSite[];
 };
 
-export const SiteMapComp: FC<Props> = ({ className, dataTestId, sites }) => {
+export const SiteMapComp: FC<Props> = ({
+  className,
+  dataTestId,
+  sites,
+  allowedSites,
+}) => {
   const { isLoaded } = useJsApiLoader({
     id: "google-map-script",
     googleMapsApiKey: GOOGLE_MAP_API_KEY,
@@ -116,8 +122,14 @@ export const SiteMapComp: FC<Props> = ({ className, dataTestId, sites }) => {
       ...filters,
       pageSize: 50,
       pageIndex: 1,
+      sites:
+        allowedSites?.length > 0
+          ? allowedSites.map((item: any) => {
+              return item?.id;
+            })
+          : [],
     });
-  }, []);
+  }, [allowedSites]);
 
   useEffect(() => {
     if (!events?.data?.event) return;

@@ -13,7 +13,6 @@ export const dangerChartColors = [
   "rgba(255, 77, 79, 1)",
   "rgba(252, 115, 116, 1)",
   "rgba(255, 174, 175, 1)",
-  
 ];
 
 export const systemChartColors = [
@@ -25,6 +24,6 @@ export const systemChartColors = [
   "#9254DE",
 ];
 
-export const siteChartBarColor = "#096DD9";
+export const siteChartBarColor = "#3a99ff";
 
 export const weeklyAlertChartBarColor = "rgba(19, 194, 194, 0.4)";

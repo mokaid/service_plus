@@ -1,17 +1,22 @@
 .widget {
   height: 21.125rem;
   border-radius: 16px !important;
+  color: 'white'
 }
-.widget_alerts_map{
+
+.widget_alerts_map {
   height: 21.125rem;
   background-color: #1B2438 !important;
   border-top-left-radius: 16px !important;
   border-bottom-left-radius: 16px !important;
 }
-.widget_bg{
-  
+
+.widget_bg {
   background-color: #1B2438 !important;
+
 }
-.widget_bg_light{
+
+.widget_bg_light {
   box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+
 }

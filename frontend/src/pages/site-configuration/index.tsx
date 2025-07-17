@@ -12,12 +12,16 @@ import { AddGroupModal } from "@/modals/add-group-modal";
 
 import { EditSiteMapModal } from "@/modals/edit-site-map-modal";
 
-import { useGetOrganizationsMutation } from "@/services";
+import {
+  useGetOrganizationsMutation,
+  useGetUserAllowedSitesMutation,
+} from "@/services";
 import { useAppSelector } from "@/hooks/use-app-selector";
 import { getSelectedSite } from "@/store/selectors/sites";
 import EditOrganizationModal from "@/modals/edit-organization-modal";
 import EditGroupModal from "@/modals/edit-group-modal";
 import { PermissionGuard } from "@/components/permission-guard";
+import { RootState } from "@/types/store";
 
 export const SiteConfiguration: FC = () => {
   const dispatch = useAppDispatch();
@@ -30,7 +34,11 @@ export const SiteConfiguration: FC = () => {
   const [pageIndex, setPageIndex] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [totalItems, setTotalItems] = useState(0);
+  const [siteConfiguartionData, setSiteConfigurationData] = useState<any[]>([]);
 
+  const user = useAppSelector((state: RootState) => state.authState.user);
+
+  // Get Organization
   const [getOrganizations, { isLoading, data: organizations }] =
     useGetOrganizationsMutation();
 
@@ -41,9 +49,47 @@ export const SiteConfiguration: FC = () => {
     });
   }, [getOrganizations, pageIndex, pageSize]);
 
+  const [getUserAllowedSites] = useGetUserAllowedSitesMutation();
+
+  const handleAllowedSites = async () => {
+    const res = await getUserAllowedSites({ userGuid: user?.userGuid });
+
+    if ("data" in res) {
+      const filteredSites: any[] = [];
+
+      organizations?.orgs[0]?.sites.forEach((item: any) => {
+        res?.data?.filter?.forEach((sites: any) => {
+          const splittedValue = sites?.orgId.split("0")[0];
+          let newSiteId;
+          if (splittedValue.length === 2) {
+            newSiteId = `0${sites?.orgId}`;
+          } else {
+            newSiteId = `00${sites?.orgId}`;
+          }
+
+          if (newSiteId) {
+            if (newSiteId === item?.id) {
+              filteredSites.push(item);
+            } else {
+              return;
+            }
+          }
+        });
+      });
+
+      setSiteConfigurationData([
+        { ...organizations?.orgs[0], sites: filteredSites },
+      ]);
+      setTotalItems(filteredSites?.length);
+    }
+  };
+
   useEffect(() => {
-    if (organizations?.total) {
-      setTotalItems(organizations.total);
+    if (user?.role === 99 && user?.permission) {
+      handleAllowedSites();
+    } else {
+      setSiteConfigurationData(organizations?.orgs);
+      setTotalItems(organizations?.orgs?.length || 0);
     }
   }, [organizations]);
 
@@ -60,7 +106,6 @@ export const SiteConfiguration: FC = () => {
     <>
       {contextHolder}
       <Row gutter={[24, 24]}>
-        {" "}
         <Col span={24}>
           <Breadcrumbs />
         </Col>
@@ -94,7 +139,7 @@ export const SiteConfiguration: FC = () => {
         <Col span={24}>
           <SiteConfigurationTable
             refetch={getOrganizations}
-            data={organizations}
+            data={siteConfiguartionData}
             isLoading={isLoading}
             className={darkTheme ? "alerts_table" : "alerts_table_light"}
             pageIndex={pageIndex}

@@ -1,4 +1,8 @@
-import { useGetSitesQuery, useUpgradeBoxMutation } from "@/services";
+import {
+  useGetSitesQuery,
+  useGetUserAllowedSitesMutation,
+  useUpgradeBoxMutation,
+} from "@/services";
 import { ThemeContext } from "@/theme";
 import {
   Button,
@@ -20,8 +24,10 @@ import {
 } from "antd";
 import { TableRowSelection } from "antd/es/table/interface";
 import dayjs from "dayjs";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import styles from "./index.module.css";
+import { useAppSelector } from "@/hooks/use-app-selector";
+import { RootState } from "@/types/store";
 
 interface DataType {
   id: string;
@@ -57,6 +63,60 @@ export const SiteUpgradeTable = ({ packages, className }: Props) => {
   const [time, setTime] = useState<string>("");
   const [messageApi, contextHolder] = message.useMessage();
   const [form] = Form.useForm();
+  const [sitesData, setSitesData] = useState<any[]>([]);
+
+  const user = useAppSelector((state: RootState) => state.authState.user);
+
+  //USER ALLOWED SITES
+  const [getUserAllowedSites, { isLoading: allowedSitesLoadaer }] =
+    useGetUserAllowedSitesMutation();
+
+  const handleAllowedSitesForCustomer = async () => {
+    const res = await getUserAllowedSites({ userGuid: user?.userGuid });
+
+    if ("data" in res) {
+      const filteredSites: any[] = [];
+      currentData?.forEach((item: any) => {
+        res?.data?.filter?.forEach((sites: any) => {
+          const splittedValue = sites.orgId.split("0")[0];
+          let newSiteId;
+          if (splittedValue.length === 2) {
+            newSiteId = `0${sites?.orgId}`;
+          } else {
+            newSiteId = `00${sites?.orgId}`;
+          }
+
+          if (newSiteId) {
+            if (newSiteId === item?.id) {
+              filteredSites.push(item);
+            } else {
+              return;
+            }
+          }
+
+          setSitesData(filteredSites);
+        });
+      });
+    }
+  };
+
+  useEffect(() => {
+    if (user?.role === 99 && user?.permission) {
+      handleAllowedSitesForCustomer();
+    } else {
+      setSitesData(currentData);
+    }
+  }, [user, currentData]);
+
+  const filteredSitePackages = useMemo(() => {
+    if (user?.role === 99 && !user?.permission) {
+      return packages?.filter((item: any) => {
+        return item?.creator === user?.userGuid;
+      });
+    } else {
+      return packages;
+    }
+  }, [user, packages]);
 
   const { appTheme } = useContext(ThemeContext);
   const darkTheme = appTheme === "dark";
@@ -166,8 +226,8 @@ export const SiteUpgradeTable = ({ packages, className }: Props) => {
                   }}
                   onChange={onChoosePackage}
                   options={
-                    packages
-                      ? packages.map(
+                    filteredSitePackages
+                      ? filteredSitePackages.map(
                           (item: { fileName: string; boxType: number }) => ({
                             label: `${item.fileName} (${
                               item.boxType == 1
@@ -206,7 +266,7 @@ export const SiteUpgradeTable = ({ packages, className }: Props) => {
             rowKey={(record) => record.id}
             dataSource={
               boxType > -1
-                ? currentData.filter(
+                ? sitesData?.filter(
                     (item: DataType & { boxType: number }) =>
                       item.boxType == boxType,
                   )

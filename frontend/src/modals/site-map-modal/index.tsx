@@ -1,45 +1,37 @@
-import { Drawer, Form, Input, Switch, Typography } from "antd";
+import { Drawer, Input, Switch, Typography } from "antd";
 import { type FC, useContext, useEffect, useState } from "react";
-
-import { useAppDispatch } from "@/hooks/use-app-dispatch";
-import { ProcessStatus } from "@/types/device-event";
-
 import { SiteMapTable } from "@/components/site-map-table";
 import { ThemeContext } from "@/theme";
 import { OrganisationSite } from "@/types/organisation";
 import styles from "./index.module.css";
+import { setSelectedSite } from "@/store/slices/sites";
+import { useDispatch } from "react-redux";
 
 type Props = {
   dataTestId?: string;
   collapse: boolean;
   sites: OrganisationSite[];
   onClick: (collapsed: boolean) => void;
+  selectedSiteId: string;
 };
-
-type Fields = {
-  processStatus: ProcessStatus;
-  remarks: string;
-  caseNumber: string;
-};
-
-const { Item } = Form;
 
 export const SiteInfoModal: FC<Props> = ({
   sites,
   dataTestId,
   collapse,
   onClick,
+  selectedSiteId,
 }) => {
-  const dispatch = useAppDispatch();
-  const [form] = Form.useForm<Fields>();
   const [search, setSearch] = useState<string>();
   const show = collapse;
   const { appTheme } = useContext(ThemeContext);
   const darkTheme = appTheme === "dark";
   const [showOnlyDisconnected, setShowOnlyDisconnected] = useState(false);
   const [filteredSites, setFilteredSites] = useState<OrganisationSite[]>();
+  const dispatch = useDispatch();
 
   const handleClose = () => {
+    dispatch(setSelectedSite(null));
     onClick(!collapse);
   };
 

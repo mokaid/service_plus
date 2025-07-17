@@ -4,13 +4,9 @@ import { getLastPathSegment } from "../../utils/helper.js";
 import { sitesFilter } from "../../utils/siteFilter.js";
 
 export const eventsRoutes = async (app) => {
+  //Get Events
   app.post("/events", async (request, reply) => {
     var sites_filter = await sitesFilter(request);
-    // var filtersVendors = [];
-    // if ( request?.body?.vendors && request?.body?.vendors.length > 0 ) {
-    //   filtersVendors = request?.body?.vendors;
-    // }
-
     try {
       const requestData = {
         ...(request?.body?.endTime
@@ -40,7 +36,7 @@ export const eventsRoutes = async (app) => {
         ...(request?.body?.pageSize
           ? { pageSize: request?.body?.pageSize }
           : {}),
-        ...(request?.body?.processed
+        ...(request?.body?.processed || request?.body.processed === 0
           ? { processed: request?.body?.processed }
           : { processed: -1 }),
         ...(sites_filter ? { sites: sites_filter } : {}),
@@ -51,7 +47,10 @@ export const eventsRoutes = async (app) => {
         ...(request?.body?.priority
           ? { itemLevels: request?.body?.priority }
           : { itemLevels: [0, 1, 2, 3, 4, 5] }),
+        orderBy: -1,
       };
+
+      console.log(requestData, "requestData from eventsRoutes");
 
       const response = await axiosInstance.post(
         `/${ENDPOINTS.QUERY_EVENTS}`,
@@ -71,10 +70,12 @@ export const eventsRoutes = async (app) => {
     }
   });
 
+  // Update Event Status
+
   app.post("/processEvent", async (request, reply) => {
     try {
       const requestData = {
-        msgType: "postbatchprocessevents",
+        msgType: getLastPathSegment(ENDPOINTS.PROCESS_EVENT),
         actionType: "Acknowledge with no Action",
         _sendTime: new Date().toISOString().replace("T", " ").substring(0, 23),
         _sender: "",
@@ -98,16 +99,17 @@ export const eventsRoutes = async (app) => {
       throw error;
     }
   });
+
+  //Update Single Event Status
+
   app.post("/postProcessSingleEvent", async (request, reply) => {
     try {
       const requestData = {
-        msgType: "postprocesssingleevent",
+        msgType: getLastPathSegment(ENDPOINTS.POST_PROCESS_SINGLE),
         _sendTime: new Date().toISOString().replace("T", " ").substring(0, 23),
         _sender: "",
         ...request?.body,
       };
-
-      console.log(requestData, "requestData");
 
       const response = await axiosInstance.post(
         `/${ENDPOINTS.POST_PROCESS_SINGLE}`,
@@ -126,6 +128,8 @@ export const eventsRoutes = async (app) => {
       throw error;
     }
   });
+
+  //Post Quick Recovery
 
   app.post("/fastRecovery", async (request, reply) => {
     try {

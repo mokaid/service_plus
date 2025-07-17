@@ -26,53 +26,42 @@ import { generateColumns } from "./config";
 type Props = {
   className: string;
   dataTestId: string;
-  data?: DeviceEvent | null;
+  eventsData?: any[];
   pageIndex: number;
   pageSize: number;
   totalAlerts: number;
   handlePageChange: (page: number, pageSize: number) => void;
   loading: boolean;
   refetch: MutationTrigger<MutationDefinition<any, any, any, any, any>>;
+  eventsLodaer: boolean;
+  setRefetch?: React.Dispatch<React.SetStateAction<boolean>>;
+  recordTable?: boolean;
 };
 
 export const AllAlertsTable: FC<Props> = ({
   className,
   dataTestId,
-  data,
+  eventsData,
   pageIndex,
   pageSize,
   totalAlerts,
   handlePageChange,
   loading,
   refetch,
+  eventsLodaer,
+  setRefetch,
+  recordTable,
 }: Props) => {
   const dispatch = useDispatch();
   // const event = useAppSelector(getEvents); //needs to be passed from parents
 
   const rowKey = useAppSelector(getSelectedRowIds);
   const [handleProcessEvents, {}] = useProcessEventMutation();
-  const [getEvents, { data: events, isLoading: tableLoading }] =
-    useQueryEventsMutation();
-
-  const [allowedSites, setAllowedSites] = useState<any[]>([]);
+  const [getEvents] = useQueryEventsMutation();
 
   const [messageApi, contextHolder] = message.useMessage();
   const filters = useSelector((state: RootState) => state.filters);
   const user = useSelector((state: RootState) => state.authState.user);
-
-  //USER ALLOWED SITES
-  const [getUserAllowedSites] = useGetUserAllowedSitesMutation();
-
-  const handleAllowedSites = async () => {
-    const res = await getUserAllowedSites({ userGuid: user?.userGuid });
-    if ("data" in res) {
-      setAllowedSites(
-        (res.data.filter || []).map((item: { orgId: string }) => {
-          return item.orgId;
-        }),
-      );
-    }
-  };
 
   const onSelectChange = (selectedRowKeys: React.Key[]) => {
     dispatch(setSelectedEventsId({ selectedRowKeys, pageIndex }));
@@ -88,7 +77,7 @@ export const AllAlertsTable: FC<Props> = ({
       dispatch(setSelectedEvents([selectedEvent]));
       dispatch(setShowProcesslarmModal(true));
     },
-    [dispatch, refetch],
+    [dispatch],
   );
 
   const handleMark = async (selectedEvent: DeviceEvent) => {
@@ -98,11 +87,17 @@ export const AllAlertsTable: FC<Props> = ({
       event,
       processStatus: 2,
     };
+
     const res = await handleProcessEvents(body);
 
     if (res) {
       if ("data" in res) {
-        getEvents({ ...filters, processed: 0 });
+        refetch({
+          ...filters,
+          processed: recordTable ? -1 : 0,
+        });
+
+        setRefetch?.(true);
 
         messageApi.open({
           type: "success",
@@ -120,31 +115,27 @@ export const AllAlertsTable: FC<Props> = ({
   const columns = generateColumns({
     onProcess: handleProcessAlarm,
     onMark: handleMark,
+    recordTable: recordTable,
   });
   const antIcon = <LoadingOutlined style={{ fontSize: 24 }} spin />;
 
   useEffect(() => {
-    handleAllowedSites();
-  }, []);
-
-  useEffect(() => {
     (async () => {
-      await getEvents({
+      await refetch({
         ...filters,
         pageSize,
         pageIndex,
-        sites: filters.sites.length > 0 ? filters.sites : [],
-        processed: 0,
+        processed: recordTable ? -1 : 0,
       });
     })();
-  }, [filters, pageSize, pageIndex, getEvents, refetch]);
+  }, [filters, pageSize, pageIndex, recordTable]);
 
   useEffect(() => {
-    if (events) {
-      const total = events?.data?.totalCount || 0;
+    if (eventsData) {
+      const total = (eventsData as any)?.data?.totalCount || 0;
       dispatch(setTotalAlertsGlobal(total));
     }
-  }, [dispatch, events]);
+  }, [eventsData]);
 
   return (
     <>
@@ -154,19 +145,19 @@ export const AllAlertsTable: FC<Props> = ({
         // headerBg="#fff"
         className={className}
         scroll={{ x: 1200 }}
-        dataSource={events?.data?.event}
+        dataSource={(eventsData as any)?.data?.event}
         sticky={true}
         columns={columns}
         rowSelection={rowSelection}
         showSorterTooltip={false}
         loading={{
           indicator: <Spin indicator={antIcon} />,
-          spinning: loading || tableLoading,
+          spinning: loading || eventsLodaer,
         }}
         pagination={{
           pageSize,
           current: pageIndex,
-          total: events?.data?.totalCount,
+          total: (eventsData as any)?.data?.totalCount,
           showQuickJumper: true,
           showSizeChanger: true,
           onChange: handlePageChange,
@@ -175,7 +166,12 @@ export const AllAlertsTable: FC<Props> = ({
         // preserveSelectedRowKeys={true}
       />
 
-      <ProcessAlarmModal refetch={refetch} dataTestId="process-alarm" />
+      <ProcessAlarmModal
+        refetch={refetch}
+        dataTestId="process-alarm"
+        setRefetch={setRefetch}
+        recordTable={recordTable}
+      />
     </>
   );
 };

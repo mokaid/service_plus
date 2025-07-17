@@ -25,7 +25,7 @@ export function getItem({
 }
 
 export const splitName = (name: string) => {
-  return name.split(" ");
+  return name?.split(" ");
 };
 
 export function getOfflineSystemsCount(data: any) {

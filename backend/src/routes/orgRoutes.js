@@ -7,7 +7,6 @@ export const orgRoutes = async (app) => {
   //Get Organizations & Sites & Groups
   app.post("/getOrganizations", async (request, reply) => {
     try {
-      var sites_filter = await sitesFilter(request);
       const requestData = {
         msgType: getLastPathSegment(ENDPOINTS.GET_ORGANIZATIONS),
         _sender: "",
@@ -31,6 +30,8 @@ export const orgRoutes = async (app) => {
       throw error;
     }
   });
+
+  //Post Organization
 
   app.post("/postOrganization", async (request, reply) => {
     try {
@@ -60,6 +61,8 @@ export const orgRoutes = async (app) => {
     }
   });
 
+  //Get All Sites
+
   app.get("/sites", async (request, reply) => {
     try {
       var sites = [];
@@ -81,12 +84,12 @@ export const orgRoutes = async (app) => {
         }
       );
       if (response?.data && response.data?.error == 0) {
-        response.data.orgs.map((org) => {
+        response.data?.orgs?.map((org) => {
           if (org.sites) {
             const filteredSites =
               sites_filter.length > 0
-                ? org.sites.filter((item) => sites_filter.includes(item.id))
-                : org.sites;
+                ? org?.sites?.filter((item) => sites_filter.includes(item.id))
+                : org?.sites;
             sites = [...sites, ...filteredSites];
           }
         });
@@ -99,49 +102,6 @@ export const orgRoutes = async (app) => {
       );
       throw error;
     }
-    // try {
-    //   var sites = [];
-    //   var sites_filter = await sitesFilter(request);
-
-    //   const requestData = {
-    //     msgType: getLastPathSegment(ENDPOINTS.GET_ORGANIZATIONS),
-    //     _sender: "",
-    //     requestSiteOnly: {
-    //       connectionState: request?.body?.connectionState,
-    //       pageIndex: request?.body?.pageIndex,
-    //       pageSize: request?.body?.pageSize,
-    //     },
-    //     _sendTime: new Date().toISOString().replace("T", " ").substring(0, 23),
-    //   };
-
-    //   const response = await axiosInstance.post(
-    //     `/${ENDPOINTS.GET_ORGANIZATIONS}`,
-    //     requestData,
-    //     {
-    //       headers: {
-    //         ...request?.headers,
-    //       },
-    //     }
-    //   );
-    //   if (response?.data && response.data?.error == 0) {
-    //     response?.data?.orgs?.map((org) => {
-    //       if (org.sites) {
-    //         const filteredSites =
-    //           sites_filter.length > 0
-    //             ? org.sites.filter((item) => sites_filter.includes(item.id))
-    //             : org.sites;
-    //         sites = [...sites, ...filteredSites];
-    //       }
-    //     });
-    //   }
-
-    //   reply.send({ data: sites });
-    // } catch (error) {
-    //   console.error(
-    //     `[RESPONSE] Error: ${error.response?.data || error.message}`
-    //   );
-    //   throw error;
-    // }
   });
 
   // RegisterBox
@@ -229,9 +189,11 @@ export const orgRoutes = async (app) => {
   app.post("/updateioevents", async (request, reply) => {
     try {
       const requestData = {
-        msgType: ENDPOINTS.UPDATE_IO_EVENTS,
+        msgType: getLastPathSegment(ENDPOINTS.UPDATE_IO_EVENTS),
         siteId: request?.body?.siteId,
         ioCustomText: request?.body?.ioCustomText,
+        _sender: "",
+        _sendTime: new Date().toISOString().replace("T", " ").substring(0, 23),
       };
       const response = await axiosInstance.post(
         `/${ENDPOINTS.UPDATE_IO_EVENTS}`,
@@ -394,8 +356,9 @@ export const orgRoutes = async (app) => {
     try {
       const requestData = {
         msgType: getLastPathSegment(ENDPOINTS.DELETE_MASKED_ITEM),
-        keyId: request?.body?.keyId,
-        _sender: "",
+        systemId: request?.body?.keyId,
+        type: request?.body?.type,
+        _sender: "admin",
         _sendTime: new Date().toISOString().replace("T", " ").substring(0, 23),
       };
       const response = await axiosInstance.post(
@@ -420,13 +383,13 @@ export const orgRoutes = async (app) => {
   app.post("/configureBox", async (request, reply) => {
     try {
       const requestData = {
-        msgType: getLastPathSegment(ENDPOINTS.CONFIGURE_BOX),
+        msgType: getLastPathSegment(ENDPOINTS.POST_CONFIGURE_BOX),
         ...request?.body,
         _sender: "",
         _sendTime: new Date().toISOString().replace("T", " ").substring(0, 23),
       };
       const response = await axiosInstance.post(
-        `/${ENDPOINTS.CONFIGURE_BOX}`,
+        `/${ENDPOINTS.POST_CONFIGURE_BOX}`,
         requestData,
         {
           headers: {
@@ -443,12 +406,14 @@ export const orgRoutes = async (app) => {
     }
   });
 
+  //Get Systems
+
   app.post("/systems", async (request, reply) => {
     try {
       var systems = [];
 
       const requestData = {
-        msgType: "getsitesystem",
+        msgType: getLastPathSegment(ENDPOINTS.GET_SYSTEMS),
         _sender: "",
         siteId: request?.body?.siteId,
         _sendTime: new Date().toISOString().replace("T", " ").substring(0, 23),
@@ -477,12 +442,14 @@ export const orgRoutes = async (app) => {
     }
   });
 
+  // Get Devices
+
   app.post("/devices", async (request, reply) => {
     try {
       var devices = [];
 
       const requestData = {
-        msgType: "getsitesystemobject",
+        msgType: getLastPathSegment(ENDPOINTS.GET_DEVICES),
         _sender: "",
         systemId: request?.body?.systemId,
         pageIndex: request?.body?.pageIndex,
@@ -512,12 +479,14 @@ export const orgRoutes = async (app) => {
     }
   });
 
+  // Get Site System Objects
+
   app.post("/eventCategories", async (request, reply) => {
     try {
       var eventCategories = [];
 
       const requestData = {
-        msgType: "getsitesystemobjectitem",
+        msgType: getLastPathSegment(ENDPOINTS.GET_EVENT_CATEGORIES),
         _sender: "",
         objId: request?.body?.objId,
         pageIndex: request?.body?.pageIndex,
@@ -537,6 +506,71 @@ export const orgRoutes = async (app) => {
       }
 
       reply.send({ data: eventCategories });
+    } catch (error) {
+      console.error(
+        `[RESPONSE] Error: ${error.response?.data || error.message}`
+      );
+      throw error;
+    }
+  });
+
+  // Get Box Property
+
+  app.post("/getBoxProperty", async (request, reply) => {
+    let siteInfo = [];
+    try {
+      const requestData = {
+        msgType: getLastPathSegment(ENDPOINTS.GET_BOX_PROPERTY),
+        _sender: "",
+        requestContacts: 1,
+        _sendTime: new Date().toISOString().replace("T", " ").substring(0, 23),
+        ...request.body,
+      };
+
+      const response = await axiosInstance.post(
+        `/${ENDPOINTS.GET_BOX_PROPERTY}`,
+        requestData,
+        {
+          headers: { ...request?.headers },
+        }
+      );
+      if (response?.data && response.data?.error == 0) {
+        siteInfo = response.data;
+      }
+
+      reply.send({ data: siteInfo });
+    } catch (error) {
+      console.error(
+        `[RESPONSE] Error: ${error.response?.data || error.message}`
+      );
+      throw error;
+    }
+  });
+
+  //Post Organization Contacts
+
+  app.post("/PostOrgContacts", async (request, reply) => {
+    let siteInfo = [];
+    try {
+      const requestData = {
+        msgType: getLastPathSegment(ENDPOINTS.POST_ORG_CONTACTS),
+        _sender: "",
+        _sendTime: new Date().toISOString().replace("T", " ").substring(0, 23),
+        ...request.body,
+      };
+
+      const response = await axiosInstance.post(
+        `/${ENDPOINTS.POST_ORG_CONTACTS}`,
+        requestData,
+        {
+          headers: { ...request?.headers },
+        }
+      );
+      if (response?.data && response.data?.error == 0) {
+        siteInfo = response.data;
+      }
+
+      reply.send({ data: siteInfo });
     } catch (error) {
       console.error(
         `[RESPONSE] Error: ${error.response?.data || error.message}`

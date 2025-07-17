@@ -1,14 +1,13 @@
-import Fastify from 'fastify';
-import fastifyMysql from '@fastify/mysql';
-import { DB_CONFIG } from './config/database.js';
-import { routes } from './src/routes/index.js';
-import cors from '@fastify/cors'
-import fastifySession from '@fastify/session';
-import fastifyCookie from '@fastify/cookie';
-import middie from '@fastify/middie';
+import Fastify from "fastify";
+import fastifyMysql from "@fastify/mysql";
+import { DB_CONFIG } from "./config/database.js";
+import { routes } from "./src/routes/index.js";
+import cors from "@fastify/cors";
+import fastifySession from "@fastify/session";
+import fastifyCookie from "@fastify/cookie";
+import middie from "@fastify/middie";
 // import {userSessionMiddleware} from './src/middlewares/userSessionMiddleware.js'
-import fastifyMultipart from '@fastify/multipart';
-
+import fastifyMultipart from "@fastify/multipart";
 
 const app = Fastify({
   logger: true,
@@ -16,7 +15,7 @@ const app = Fastify({
 
 // Register multipart plugin
 await app.register(fastifyMultipart, {
-  attachFieldsToBody: true
+  attachFieldsToBody: true,
 });
 
 // Register MySQL plugin
@@ -24,13 +23,13 @@ await app.register(fastifyMysql, DB_CONFIG);
 await app.register(middie);
 await app.register(fastifyCookie);
 await app.register(fastifySession, {
-  cookieName: 'user_session',
-  secret: '55bbc4b8d397ee9b397de8c128413c39415b074cb6e4220389e7816a1b465143', // Replace with a secure key
+  cookieName: "user_session",
+  secret: "55bbc4b8d397ee9b397de8c128413c39415b074cb6e4220389e7816a1b465143", // Replace with a secure key
   cookie: {
     secure: true, // Set to `true` in production (requires HTTPS)
     maxAge: 1000 * 60 * 60 * 24 * 100, // 100 days in milliseconds
     httpOnly: true,
-    sameSite: 'lax'
+    sameSite: "lax",
   },
   saveUninitialized: false, // Only save sessions with data
 });
@@ -38,11 +37,11 @@ await app.register(fastifySession, {
 const allowedOrigins = [
   "http://localhost:3000",
   "http://127.0.0.1:3000",
-  "http://86.98.85.100:3001",  // Your frontend external IP and port
+  "http://86.98.85.100:3001", // Your frontend external IP and port
   "http://86.98.85.100",
   "http://94.200.50.118",
   "http://94.200.50.118:3001",
-  "http://145.223.90.99:3000"  // ✅ ADD YOUR VPS IP HERE
+  "http://145.223.90.99:3000", // ✅ ADD YOUR VPS IP HERE
 ];
 
 // CORS
@@ -56,7 +55,6 @@ app.register(cors, {
 // Register Routes
 app.register(routes);
 
-
 // Middlewares
 // app.use(userSessionMiddleware)
 
@@ -65,9 +63,9 @@ app.register(routes);
  */
 const start = async () => {
   try {
-    app.log.info('Starting Fastify server...');
-    await app.listen({ port: 5001, host: '0.0.0.0' });
-    app.log.info(`Server running at http://localhost:3001`);
+    app.log.info("Starting Fastify server...");
+    await app.listen({ port: 5001, host: "0.0.0.0" });
+    app.log.info(`Server running at http://localhost:5001`);
   } catch (err) {
     app.log.error(err);
     process.exit(1);

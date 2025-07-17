@@ -12,7 +12,7 @@ import {
   Switch,
   message,
 } from "antd";
-import React, { FC, useContext, useEffect, useState } from "react";
+import React, { FC, useContext, useEffect, useMemo, useState } from "react";
 
 import { useAppSelector } from "@/hooks/use-app-selector";
 import {
@@ -238,22 +238,35 @@ export const EditUserModal: FC<Props> = ({
   const [selectedPermissions, setSelectedPermissions] = useState(permissions);
   const [selectedRole, setSelectedRole] = useState("user");
   const [status, setStatus] = useState(true);
-  //   const uid = useAppSelector((state) => state.authState.user?.userGuid as string);
+  const [userPermission, setUserPermissions] = useState<string>("");
 
   const [messageApi, contextHolder] = message.useMessage();
-
-  const uid = useAppSelector(
-    (state) => state.authState.user?.userGuid as string,
-  );
 
   const [registerUser, { isLoading: registerLodaer }] =
     useRegisterUserMutation();
 
+  useEffect(() => {
+    setSelectedPermissions(permissions);
+  }, []);
+
   const {
     isLoading: Permissionsloader,
     refetch: refetchUsersPermissions,
-    data: getAllUsersPermsiions,
+    data: getAllUsersPermissions,
   } = useGetUserPermissionListQuery({});
+
+  useEffect(() => {
+    const selectedUserPermission = getAllUsersPermissions?.user.find(
+      (item: any) => {
+        return item.userGuid === user?.userGuid;
+      },
+    );
+
+    const decodedPermissions = decodeBase64(selectedUserPermission?.permission);
+
+    setUserPermissions(selectedUserPermission?.permission);
+    setSelectedPermissions(decodedPermissions as Permissions);
+  }, [getAllUsersPermissions, user]);
 
   const handlePermissionChange = (
     key: string,
@@ -328,8 +341,17 @@ export const EditUserModal: FC<Props> = ({
 
         messageApi.success(`User has been updated successfully !`);
 
-        refetch();
-        refetchUsersPermissions();
+        await refetch();
+        await refetchUsersPermissions();
+
+        const selectedUserPermision = await getAllUsersPermissions?.user.find(
+          (item: any) => {
+            return item.userGuid === user?.userGuid;
+          },
+        );
+
+        setUserPermissions(selectedUserPermision?.permission);
+
         handleCancel();
       } else {
         messageApi.error("There was an error");
@@ -343,17 +365,17 @@ export const EditUserModal: FC<Props> = ({
   useEffect(() => {
     if (user) {
       setSelectedRole(user.role === 99 ? "customer" : "user");
-      const userPermissions = user.permission
-        ? decodeBase64(user.permission)
-        : "";
-      const filteredPermissions = { ...userPermissions };
+      // const userPermissions = userPermission
+      //   ? decodeBase64(userPermission)
+      //   : "";
+      // const filteredPermissions = { ...userPermissions };
 
-      delete filteredPermissions["user"];
-      delete filteredPermissions["userParent"];
+      // delete filteredPermissions["user"];
+      // delete filteredPermissions["userParent"];
 
-      setSelectedPermissions(
-        userPermissions ? filteredPermissions : permissions,
-      );
+      // setSelectedPermissions(
+      //   userPermissions ? filteredPermissions : permissions,
+      // );
       setStatus(user.status ? true : false);
       form.setFieldsValue({
         ...user,
@@ -361,7 +383,7 @@ export const EditUserModal: FC<Props> = ({
         status: user.status ? true : false,
       });
     }
-  }, [user]);
+  }, [user, getAllUsersPermissions]);
 
   const { appTheme } = useContext(ThemeContext);
   const darkTheme = appTheme === "dark";
@@ -493,42 +515,44 @@ export const EditUserModal: FC<Props> = ({
               }}
             >
               <Row gutter={[16, 16]}>
-                {Object.entries(selectedPermissions).map(([key, perms]) => {
-                  const availablePermissions: CheckboxGroupProps["options"] =
-                    Object.keys(perms).map((permKey) => ({
-                      label:
-                        keyToLabelMap[permKey as keyof typeof keyToLabelMap],
-                      value: permKey,
-                    }));
-                  const checkedValues = Object.keys(perms).filter(
-                    (permKey) => perms[permKey as keyof typeof perms],
-                  );
+                {Object.entries(selectedPermissions || {}).map(
+                  ([key, perms]) => {
+                    const availablePermissions: CheckboxGroupProps["options"] =
+                      Object.keys(perms).map((permKey) => ({
+                        label:
+                          keyToLabelMap[permKey as keyof typeof keyToLabelMap],
+                        value: permKey,
+                      }));
+                    const checkedValues = Object.keys(perms).filter(
+                      (permKey) => perms[permKey as keyof typeof perms],
+                    );
 
-                  return (
-                    <Col span={12} key={key}>
-                      <Card
-                        style={{
-                          background: `${darkTheme ? "rgb(5, 15, 49)" : ""}`,
-                        }}
-                        size="small"
-                        title={camelToSentence(key)}
-                        bordered
-                      >
-                        <Checkbox.Group
-                          value={checkedValues}
-                          className={"filter_checkbox"}
-                          options={availablePermissions}
-                          onChange={(selectedPermission) => {
-                            handlePermissionChange(
-                              key,
-                              selectedPermission as string[],
-                            );
+                    return (
+                      <Col span={12} key={key}>
+                        <Card
+                          style={{
+                            background: `${darkTheme ? "rgb(5, 15, 49)" : ""}`,
                           }}
-                        />
-                      </Card>
-                    </Col>
-                  );
-                })}
+                          size="small"
+                          title={camelToSentence(key)}
+                          bordered
+                        >
+                          <Checkbox.Group
+                            value={checkedValues}
+                            className={"filter_checkbox"}
+                            options={availablePermissions}
+                            onChange={(selectedPermission) => {
+                              handlePermissionChange(
+                                key,
+                                selectedPermission as string[],
+                              );
+                            }}
+                          />
+                        </Card>
+                      </Col>
+                    );
+                  },
+                )}
               </Row>
             </Card>
           )}

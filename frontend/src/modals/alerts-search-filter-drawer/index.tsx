@@ -12,6 +12,7 @@ import {
   useGetSiteSystemObjectItemMutation,
   useGetSiteSystemObjectMutation,
   useGetSiteSystemsMutation,
+  useGetUserAllowedSitesMutation,
 } from "@/services";
 import { getShowEventsFilterModalState } from "@/store/selectors/events";
 import { getShowDateFilter } from "@/store/selectors/sites";
@@ -95,6 +96,7 @@ export const AlertsSearchFilterDrawer: FC<Props> = ({
   const [vendorData, setVendorData] = useState<any[]>([]);
   const [deviceData, setDeviceData] = useState<any[]>([]);
   const [categoryData, setCategoryData] = useState<any[]>([]);
+  const [sitesData, setSitesData] = useState<any[]>([]);
 
   const filters = useSelector((state: RootState) => state.filters);
 
@@ -111,6 +113,49 @@ export const AlertsSearchFilterDrawer: FC<Props> = ({
 
   const [getSiteSystemObjectItem, { data: siteSystemObjectItemData }] =
     useGetSiteSystemObjectItemMutation();
+
+  const user = useAppSelector((state: RootState) => state.authState.user);
+
+  //USER ALLOWED SITES
+  const [getUserAllowedSites, { isLoading: allowedSitesLoadaer }] =
+    useGetUserAllowedSitesMutation();
+
+  const handleAllowedSitesForCustomer = async () => {
+    const res = await getUserAllowedSites({ userGuid: user?.userGuid });
+
+    if ("data" in res) {
+      const filteredSites: any[] = [];
+      sites?.forEach((item: any) => {
+        res?.data?.filter?.forEach((sites: any) => {
+          const splittedValue = sites?.orgId?.split("0")[0];
+          let newSiteId;
+          if (splittedValue?.length === 2) {
+            newSiteId = `0${sites?.orgId}`;
+          } else {
+            newSiteId = `00${sites?.orgId}`;
+          }
+
+          if (newSiteId) {
+            if (newSiteId === item?.id) {
+              filteredSites.push(item);
+            } else {
+              return;
+            }
+          }
+
+          setSitesData(filteredSites);
+        });
+      });
+    }
+  };
+
+  useEffect(() => {
+    if (user?.role === 99 && user?.permission) {
+      handleAllowedSitesForCustomer();
+    } else {
+      setSitesData(sites);
+    }
+  }, [user, sites]);
 
   useEffect(() => {
     getFilters({});
@@ -159,8 +204,8 @@ export const AlertsSearchFilterDrawer: FC<Props> = ({
     dispatch(setShowEventsFilterModal(false));
   };
 
-  const siteOptions = sites
-    ? sites.map((site: any) => ({
+  const siteOptions = sitesData
+    ? sitesData.map((site: any) => ({
         label: site.name,
         value: site.id,
       }))
@@ -182,7 +227,7 @@ export const AlertsSearchFilterDrawer: FC<Props> = ({
   const categoryOptions = categoryData
     ? categoryData.map((category: any) => ({
         label: category.itemName,
-        value: category.itemId,
+        value: category.itemName,
       }))
     : [];
 
@@ -307,8 +352,22 @@ export const AlertsSearchFilterDrawer: FC<Props> = ({
     vendorArrays.forEach((item) => {
       vendorNames.push(item.label);
     });
-
     dispatch(setSelectedSite(""));
+
+    let priorities: number[] = [];
+    const priorityArray = values.priority
+      ? values.priority.forEach((item: number) => {
+          if (item === 0) {
+            priorities.push(0, 1);
+          } else if (item === 2) {
+            priorities.push(2, 3);
+          } else if (item === 4) {
+            priorities.push(4, 5);
+          } else {
+            priorities.push();
+          }
+        })
+      : [];
 
     dispatch(
       setFilters({
@@ -317,19 +376,21 @@ export const AlertsSearchFilterDrawer: FC<Props> = ({
           ? moment(values.datetime[0]).format("YYYY-MM-DD HH:mm:ss")
           : moment(filters.startTime).format("YYYY-MM-DD HH:mm:ss"),
         endTime: values.datetime
-          ? moment(values.datetime[1])
-              .endOf("day")
-              .format("YYYY-MM-DD HH:mm:ss")
-          : moment(filters.endTime).endOf("day").format("YYYY-MM-DD HH:mm:ss"),
+          ? moment(values.datetime[1]).format("YYYY-MM-DD HH:mm:ss")
+          : moment(filters.endTime).format("YYYY-MM-DD HH:mm:ss"),
 
         sites: values.sites || [],
-        priority: values.priority ? values.priority.flat() : [],
+        priority: priorities,
         devices: values.devices || null,
         eventType: values.eventType || null,
         vendors: vendorNames,
       }),
     );
     dispatch(setShowEventsFilterModal(false));
+  };
+
+  const handleEventChange = (value: any) => {
+    console.log(value, "value");
   };
 
   return (
@@ -471,6 +532,7 @@ export const AlertsSearchFilterDrawer: FC<Props> = ({
             allowClear={true}
             options={categoryOptions}
             className="select_input"
+            onChange={handleEventChange}
           />
         </Item>
         {/* )} */}

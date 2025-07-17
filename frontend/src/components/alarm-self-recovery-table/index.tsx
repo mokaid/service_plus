@@ -19,6 +19,7 @@ import {
 } from "@/utils/general-helpers";
 import {
   useGetFastRecoveryMutation,
+  useGetUserAllowedSitesMutation,
   useQueryeventsiteMutation,
 } from "@/services";
 import { useNavigate } from "react-router-dom";
@@ -29,6 +30,7 @@ import { useAppSelector } from "@/hooks/use-app-selector";
 import { getRecoveryFiltersState } from "@/store/selectors/recovery";
 import { useAppDispatch } from "@/hooks/use-app-dispatch";
 import { setRecoveryFilters } from "@/store/slices/recovery";
+import { RootState } from "@/types/store";
 type Props = {
   className: string;
   dataTestId: string;
@@ -54,11 +56,47 @@ export const AlarmSelfRecoveryTable: FC<Props> = ({
 }: Props) => {
   const dispatch = useDispatch();
   const [messageApi, contextHolder] = message.useMessage();
+  const [alertsSite, setAlertsSite] = useState<any[]>([]);
+
+  const user = useAppSelector((state: RootState) => state.authState.user);
 
   const { startTime, endTime } = useAppSelector(getRecoveryFiltersState);
 
-  const [getFastRecovery, { isLoading: recoveryLoading }] =
+  const [getFastRecovery, { data: currentData, isLoading: recoveryLoading }] =
     useGetFastRecoveryMutation();
+
+  const [getUserAllowedSites, { isLoading: allowedSitesLoadaer }] =
+    useGetUserAllowedSitesMutation();
+
+  const handleAllowedSitesForWeeklyALertsOfCustomer = async (data: any[]) => {
+    const res = await getUserAllowedSites({ userGuid: user?.userGuid });
+
+    if ("data" in res) {
+      const filteredSites: any[] = [];
+      ((data || currentData) as any)?.data?.site?.forEach((item: any) => {
+        res?.data?.filter.forEach((sites: any) => {
+          const splittedValue = sites.orgId.split("0")[0];
+          let newSiteId;
+          if (splittedValue.length === 2) {
+            newSiteId = `0${sites?.orgId}`;
+          } else {
+            newSiteId = `00${sites?.orgId}`;
+          }
+
+          if (newSiteId) {
+            if (newSiteId === item?.id) {
+              filteredSites.push(item);
+            } else {
+              return;
+            }
+          }
+        });
+      });
+
+      setAlertsSite(filteredSites);
+    }
+  };
+
   const date = new Date();
 
   const [selectedDates, setSelectedDates] = useState<
@@ -85,23 +123,21 @@ export const AlarmSelfRecoveryTable: FC<Props> = ({
     }
   };
 
-  const [alertsSite, setAlertsSite] = useState<any[]>([]);
   const navigate = useNavigate();
 
   useEffect(() => {
     (async () => {
-      const res = await getFastRecovery(body);
-      if ("error" in res) {
-        messageApi.open({
-          type: "error",
-          content: "Request Timeout",
-        });
-      }
-      if ("data" in res) {
-        setAlertsSite(res.data.data.site);
+      const res: any = await getFastRecovery(body);
+
+      if (user?.role === 99 && user?.permission) {
+        handleAllowedSitesForWeeklyALertsOfCustomer(res?.data);
+      } else {
+        setAlertsSite(res?.data?.data?.site);
       }
     })();
-  }, [body]);
+  }, [user, body]);
+
+  console.log(alertsSite);
 
   useEffect(() => {
     if (selectedDates) {
@@ -123,6 +159,8 @@ export const AlarmSelfRecoveryTable: FC<Props> = ({
 
   const handleProcessAlarm = useCallback(
     (selectedEvent: any) => {
+      console.log(selectedEvent, "selectedEvent");
+
       // dispatch(setSelectedEvents([selectedEvent]));
       // dispatch(setShowProcesslarmModal(true));
       navigate(

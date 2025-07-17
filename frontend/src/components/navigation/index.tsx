@@ -1,20 +1,9 @@
-import {
-  type FC,
-  type ReactNode,
-  useMemo,
-  useContext,
-  useState,
-  useEffect,
-} from "react";
+import { type FC, type ReactNode, useMemo, useContext } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Menu, type MenuProps } from "antd";
-
 import { getItem } from "./utils";
 import { ThemeContext } from "@/theme";
-import { useGetSingleUserPermissionMutation } from "@/services";
-import { permissionDecode } from "@/utils/form-helpers/permissionsFunction";
-import { useAppSelector } from "@/hooks/use-app-selector";
-import { RootState } from "@/types/store";
+
 import MenuItem from "antd/es/menu/MenuItem";
 
 type NavItem = {

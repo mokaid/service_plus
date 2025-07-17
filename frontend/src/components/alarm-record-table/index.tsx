@@ -31,7 +31,7 @@ type Props = {
   totalAlerts: number;
   handlePageChange: (page: number, pageSize: number) => void;
   loading: boolean;
-  refetch: MutationTrigger<MutationDefinition<any, any, any, any, any>>
+  refetch: MutationTrigger<MutationDefinition<any, any, any, any, any>>;
 };
 
 export const AlarmRecordTable: FC<Props> = ({
@@ -43,7 +43,7 @@ export const AlarmRecordTable: FC<Props> = ({
   totalAlerts,
   handlePageChange,
   loading,
-  refetch
+  refetch,
 }) => {
   const [isLoading, setIsLoading] = useState(false);
 

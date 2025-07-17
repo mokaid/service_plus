@@ -7,10 +7,12 @@ import {
   QueryDefinition,
 } from "@reduxjs/toolkit/query";
 import { Button, Col, Row, Space, Table, Tag } from "antd";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import DeletePackgeButton from "./DeletePackageButton";
 import { ThemeContext } from "@/theme";
 import { PermissionGuard } from "@/components/permission-guard";
+import { useAppSelector } from "@/hooks/use-app-selector";
+import { RootState } from "@/types/store";
 
 interface Props {
   loading: boolean;
@@ -23,6 +25,18 @@ interface Props {
 export const PackagesTable = ({ data, loading, refetch }: Props) => {
   const [openUpload, setOpenUpload] = useState(false);
   const { appTheme } = useContext(ThemeContext);
+  const user = useAppSelector((state: RootState) => state.authState.user);
+
+  const filteredSitePackages = useMemo(() => {
+    if (user?.role === 99 && !user?.permission) {
+      return data?.filter((item: any) => {
+        return item?.creator === user?.userGuid;
+      });
+    } else {
+      return data;
+    }
+  }, [user, data]);
+
   const darkTheme = appTheme === "dark";
 
   return (
@@ -46,7 +60,7 @@ export const PackagesTable = ({ data, loading, refetch }: Props) => {
         <Col span={24}>
           <Table
             rowKey={"id"}
-            dataSource={data}
+            dataSource={filteredSitePackages}
             loading={loading}
             className={darkTheme ? "alerts_table" : "alerts_table_light"}
           >

@@ -1,64 +1,58 @@
-import {
-  type FC,
-  useState,
-  useEffect,
-  useMemo,
-  useContext,
-  useCallback,
-} from "react";
+import { type FC, useContext, useEffect, useMemo, useState } from "react";
 
-import { useDispatch, useSelector } from "react-redux";
 import {
   CheckCircleOutlined,
   CloseCircleOutlined,
   FilterOutlined,
 } from "@ant-design/icons";
-import {
-  Button,
-  Col,
-  Form,
-  Input,
-  Row,
-  Space,
-  Typography,
-  message,
-} from "antd";
+import { Button, Col, Form, Row, Space, Typography, message } from "antd";
+import { useDispatch, useSelector } from "react-redux";
 
 import { AlertsSearchFilterDrawer } from "@/modals/alerts-search-filter-drawer";
-import { setAllEvents, setShowEventsFilterModal } from "@/store/slices/events";
+import {
+  clearAllSelectEvents,
+  setShowEventsFilterModal,
+  setTotalAlertsGlobal,
+} from "@/store/slices/events";
 
 import { AllAlertsTable } from "../all-alerts-table";
 
 import styles from "./index.module.css";
 
-import { DeviceEvent } from "@/types/device-event";
-
-import {
-  useQueryEventsMutation,
-  useProcessEventMutation,
-  useGetAssetsStatisticsMutation,
-} from "@/services";
-import debouce from "lodash.debounce";
 import { useAppSelector } from "@/hooks/use-app-selector";
+import {
+  useGetUserAllowedSitesMutation,
+  useProcessEventMutation,
+  useQueryEventsMutation,
+} from "@/services";
 import { getSelectedRowIds } from "@/store/selectors/events";
+import { setFilters } from "@/store/slices/filters";
+import { setShowDateFilter } from "@/store/slices/sites";
 import { ThemeContext } from "@/theme";
 import { RootState } from "@/types/store";
-import { setShowDateFilter } from "@/store/slices/sites";
-import moment from "moment";
-import Item from "antd/es/list/Item";
 import Search from "antd/es/input/Search";
-import { setFilters } from "@/store/slices/filters";
+import debouce from "lodash.debounce";
+import { decodeBase64 } from "@/utils/decodeBase64";
 
 type Fields = {
   search: string;
 };
 
+interface PropsType {
+  setRefetch?: React.Dispatch<React.SetStateAction<boolean>>;
+  recordTable?: boolean;
+}
+
 const { Title } = Typography;
 
-export const AllAlerts: FC = () => {
+export const AllAlerts: FC<PropsType> = ({
+  setRefetch,
+  recordTable,
+}: PropsType) => {
   const dispatch = useDispatch();
   const [form] = Form.useForm<Fields>();
-  const [getAllEvents, { isLoading }] = useQueryEventsMutation();
+  const [getAllEvents, { data: currentData, isLoading }] =
+    useQueryEventsMutation();
   const [handleProcessEvents, {}] = useProcessEventMutation();
   const [messageApi, contextHolder] = message.useMessage();
   const [searchfilter, setSearchFilter] = useState<string | "">(""); //search handler state
@@ -70,9 +64,66 @@ export const AllAlerts: FC = () => {
   const darkTheme = appTheme === "dark";
   const [itemLevels, setItemLevels] = useState<any[]>([]);
   const [render, setRender] = useState<boolean>(false);
-  const selectedIds = useAppSelector(getSelectedRowIds);
+  let selectedIds = useAppSelector(getSelectedRowIds);
+  const user = useAppSelector((state: RootState) => state.authState.user);
 
   const filters = useSelector((state: RootState) => state.filters);
+
+  const totalAlerts = useSelector(
+    (state: RootState) => state.events.totalAlerts,
+  );
+
+  const [allowedSites, setAllowedSites] = useState<any[]>([]);
+
+  //USER ALLOWED SITES
+  const [getUserAllowedSites] = useGetUserAllowedSitesMutation();
+
+  const handleAllowedSites = async () => {
+    const res = await getUserAllowedSites({ userGuid: user?.userGuid });
+    const filteredSites: any[] = [];
+    if ("data" in res) {
+      res?.data?.filter?.forEach((item: any, index: number) => {
+        const splittedValue =
+          item?.orgId?.split("00")[item?.orgId.split("00").length - 1];
+
+        const orgId = res?.data?.filter[0]?.orgId?.split("00")[1];
+
+        let newSiteId;
+        if (splittedValue?.length === 2 && orgId) {
+          newSiteId = `000${item?.orgId}`;
+        }
+        if (splittedValue?.length === 3 && orgId) {
+          newSiteId = `00${item?.orgId}`;
+        }
+        if (splittedValue?.length === 3 && orgId === undefined) {
+          newSiteId = `0${item?.orgId}`;
+        }
+        if (splittedValue?.length === 2 && orgId === undefined) {
+          newSiteId = `00${item?.orgId}`;
+        }
+
+        if (newSiteId) {
+          filteredSites.push(newSiteId);
+        }
+      });
+
+      setAllowedSites(filteredSites);
+    }
+  };
+
+  useEffect(() => {
+    handleAllowedSites();
+  }, []);
+
+  useEffect(() => {
+    (async () => {
+      const res = await getAllEvents({
+        ...filters,
+        processed: recordTable ? -1 : 0,
+        sites: filters?.sites.length > 0 ? filters?.sites : allowedSites,
+      });
+    })();
+  }, [filters, allowedSites, recordTable]);
 
   const handleSubmit = (values: Fields) => {
     dispatch(
@@ -96,31 +147,31 @@ export const AllAlerts: FC = () => {
     dispatch(setShowDateFilter(true));
   };
 
-  const handlePageFilterDate = (
-    startD: string,
-    endD: string,
-    data: number[],
-    // sites?: string[]
-  ) => {
-    setRender(true);
-    if (startD !== undefined) {
-      setStartDate(startD);
-    }
-    if (endD !== undefined) {
-      setEndDate(endD);
-    }
-    if (data.length !== 0 && data !== undefined) {
-      const finalResult = {
-        ...itemLevels,
-        ...data,
-      };
-      const FilteredData = finalResult;
-      const allSelectedItems = [].concat(...Object.values(FilteredData));
-      setItemLevels(allSelectedItems);
-    } else {
-      setItemLevels([]);
-    }
-  };
+  // const handlePageFilterDate = (
+  //   startD: string,
+  //   endD: string,
+  //   data: number[],
+  //   // sites?: string[]
+  // ) => {
+  //   setRender(true);
+  //   if (startD !== undefined) {
+  //     setStartDate(startD);
+  //   }
+  //   if (endD !== undefined) {
+  //     setEndDate(endD);
+  //   }
+  //   if (data.length !== 0 && data !== undefined) {
+  //     const finalResult = {
+  //       ...itemLevels,
+  //       ...data,
+  //     };
+  //     const FilteredData = finalResult;
+  //     const allSelectedItems = [].concat(...Object.values(FilteredData));
+  //     setItemLevels(allSelectedItems);
+  //   } else {
+  //     setItemLevels([]);
+  //   }
+  // };
 
   const handlePageChange = (page: number, pageSize: number) => {
     setPageIndex(page);
@@ -148,35 +199,26 @@ export const AllAlerts: FC = () => {
     return debouce(handleChange, 300);
   }, []);
 
-  const { totalAlerts } = useSelector((state: RootState) => state.events);
-  const [
-    getAssetsStatistics,
-    { data: dashboardStatistics, isLoading: dashboardLoading },
-  ] = useGetAssetsStatisticsMutation();
-
-  useEffect(() => {
-    (async () => {
-      await getAssetsStatistics({
-        ...filters,
-        startTime: moment(filters.startTime).format("YYYY-MM-DD HH:mm:ss"),
-        endTime: moment(filters.endTime).format("YYYY-MM-DD HH:mm:ss"),
-      });
-    })();
-  }, [filters]);
-
   const ClearAllEvents = async () => {
     const event: Array<number> = selectedIds;
     const body: any = {
       event,
       processStatus: 2,
     };
+
     if (selectedIds.length > 0) {
       const res = await handleProcessEvents(body);
       if (res) {
         if ("data" in res) {
-          getAssetsStatistics({
-            ...filters,
-          });
+          if (!recordTable) {
+            await getAllEvents({
+              ...filters,
+              processStatus: recordTable ? -1 : 0,
+            });
+          }
+
+          // dispatch(clearAllSelectEvents());
+
           messageApi.open({
             type: "success",
             content: "Process status updated",
@@ -196,13 +238,10 @@ export const AllAlerts: FC = () => {
     }
   };
 
-  useEffect(() => {
-    (async () => {
-      const res = await getAllEvents({
-        processed: 0,
-      });
-    })();
-  }, []);
+  const dashboardPermission = useMemo(() => {
+    const permissions = decodeBase64(user?.permission || "");
+    return permissions?.Dashboard.m;
+  }, [user]);
 
   return (
     <>
@@ -210,7 +249,9 @@ export const AllAlerts: FC = () => {
       <Row gutter={[24, 24]}>
         <Col span={24}>
           <header className={styles.header}>
-            <Title level={4}>All Alerts — {totalAlerts}</Title>
+            <Title level={4}>
+              All Alerts — {isLoading ? "0" : totalAlerts}
+            </Title>
 
             <Space size="middle" align="center">
               <Form
@@ -261,14 +302,28 @@ export const AllAlerts: FC = () => {
               >
                 Filter
               </Button>
-              <Button
-                className={`filter_btn ${darkTheme ? "filter_btn_bg" : ""}`}
-                icon={<CheckCircleOutlined />}
-                disabled={!clearAll || isLoading}
-                onClick={() => ClearAllEvents()}
-              >
-                Clear All
-              </Button>
+              {dashboardPermission === 1 &&
+                user?.role === 99 &&
+                !user?.permission && (
+                  <Button
+                    className={`filter_btn ${darkTheme ? "filter_btn_bg" : ""}`}
+                    icon={<CheckCircleOutlined />}
+                    disabled={!clearAll || isLoading}
+                    onClick={() => ClearAllEvents()}
+                  >
+                    Clear All
+                  </Button>
+                )}
+              {user?.role === 99 && !user?.permission && (
+                <Button
+                  className={`filter_btn ${darkTheme ? "filter_btn_bg" : ""}`}
+                  icon={<CheckCircleOutlined />}
+                  disabled={!clearAll || isLoading}
+                  onClick={() => ClearAllEvents()}
+                >
+                  Clear All
+                </Button>
+              )}
             </Space>
           </header>
         </Col>
@@ -277,12 +332,16 @@ export const AllAlerts: FC = () => {
           <AllAlertsTable
             refetch={getAllEvents}
             dataTestId="all-alerts-table"
+            eventsData={currentData}
             pageIndex={pageIndex}
             pageSize={pageSize}
             handlePageChange={handlePageChange}
-            loading={dashboardLoading}
+            loading={false}
             className={`${darkTheme ? "alerts_table" : ""}`}
             totalAlerts={totalAlerts}
+            eventsLodaer={isLoading}
+            setRefetch={setRefetch}
+            recordTable={recordTable}
           />
         </Col>
       </Row>

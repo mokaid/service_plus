@@ -15,10 +15,8 @@ import {
 } from "@/store/selectors/events";
 import { setSelectedEvents, setShowSiteInfoModal } from "@/store/slices/events";
 import { ProcessStatus } from "@/types/device-event";
-
 import { PermissionGuard } from "@/components/permission-guard";
 import { SiteInfoListMap } from "@/components/site-info-map-list";
-import { getSiteObject } from "@/store/selectors/sites";
 import { setShowConfigureSiteDrawer } from "@/store/slices/sites";
 import { ThemeContext } from "@/theme";
 import { EditSiteModal } from "../edit-site-modal";
@@ -30,6 +28,7 @@ type Props = {
   dataTestId?: string;
   refetch: () => any;
   sitesData?: any;
+  selectedSiteId?: string;
 };
 
 type Fields = {
@@ -44,13 +43,18 @@ const initialValues: Fields = {
   caseNumber: "",
 };
 
-export const SiteInfo: FC<Props> = ({ dataTestId, refetch, sitesData }) => {
+export const SiteInfo: FC<Props> = ({
+  dataTestId,
+  refetch,
+  sitesData,
+  selectedSiteId,
+}) => {
   const dispatch = useAppDispatch();
   const { appTheme } = useContext(ThemeContext);
   const darkTheme = appTheme === "dark";
-  const [form] = Form.useForm<Fields>();
+
   const show = useAppSelector(getShowSiteInfoModalState);
-  const [event] = useAppSelector(getSelectedEvents);
+
   const [siteInfoData, setSiteInfoData] = useState<any>();
 
   const location = useLocation();
@@ -66,9 +70,9 @@ export const SiteInfo: FC<Props> = ({ dataTestId, refetch, sitesData }) => {
 
   useEffect(() => {
     getBoxProperty({
-      siteId: location.search.split("=")[1],
+      siteId: selectedSiteId ? selectedSiteId : location.search.split("=")[1],
     });
-  }, []);
+  }, [selectedSiteId]);
 
   const handleClose = () => {
     dispatch(setShowSiteInfoModal(false));

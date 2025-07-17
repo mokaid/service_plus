@@ -5,7 +5,6 @@ import clsx from "clsx";
 import { UserAvatar } from "../user-avatar";
 
 import styles from "./index.module.css";
-import { Link } from "react-router-dom";
 import { useAppDispatch } from "@/hooks/use-app-dispatch";
 import { logout } from "@/store/slices/authSlice";
 import { useAppSelector } from "@/hooks/use-app-selector";
@@ -20,7 +19,9 @@ export const UserPanel: FC<Props> = ({
   dataTestId = "user-avatar",
 }) => {
   const [open, setOpen] = useState(false);
-  const username = useAppSelector((state) => state.authState.user?.userName as string);
+  const username = useAppSelector(
+    (state) => state.authState.user?.userName as string,
+  );
 
   const togglePopover = () => {
     setOpen((prevOpen) => !prevOpen);
@@ -37,7 +38,9 @@ export const UserPanel: FC<Props> = ({
       onOpenChange={togglePopover}
       content={
         <List size="small">
-          <Link to={'/logout'} onClick={() => dispatch(logout())}><List.Item>Logout</List.Item></Link>
+          <List.Item onClick={() => dispatch(logout())} style={{ cursor: "pointer" }}>
+            Logout
+          </List.Item>
         </List>
       }
       arrow={false}

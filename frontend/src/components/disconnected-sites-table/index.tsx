@@ -9,11 +9,16 @@ import {
 
 import { useAppSelector } from "@/hooks/use-app-selector";
 import { SiteInfo } from "@/modals/site-info-modal";
-import { useGetBoxPropertyMutation, useGetSitesQuery } from "@/services";
+import {
+  useGetBoxPropertyMutation,
+  useGetSitesQuery,
+  useGetUserAllowedSitesMutation,
+} from "@/services";
 import { getSelectedRowIds } from "@/store/selectors/events";
 import { OrganisationSite } from "@/types/organisation";
 import { LoadingOutlined } from "@ant-design/icons";
 import { generateColumns } from "./config";
+import { RootState } from "@/types/store";
 
 type Props = {
   className: string;
@@ -30,6 +35,7 @@ export const DisconnectedSitesTable: FC<Props> = ({
   const [pageSize, setPageSize] = useState(10);
   const [totalItems, setTotalItems] = useState(0);
   const [disconnectedSites, setDisconnectedSites] = useState<any[]>([]);
+  const user = useAppSelector((state: RootState) => state.authState.user);
 
   const [siteLoading, setSiteLoading] = useState<boolean>(false);
 
@@ -39,24 +45,55 @@ export const DisconnectedSitesTable: FC<Props> = ({
     pageSize,
   });
 
+  const [getUserAllowedSites] = useGetUserAllowedSitesMutation();
+
+  const handleAllowedSites = async () => {
+    const res = await getUserAllowedSites({ userGuid: user?.userGuid });
+
+    if ("data" in res) {
+      const filteredSites: any[] = [];
+      currentData?.forEach((item: any) => {
+        res?.data?.filter?.forEach((sites: any) => {
+          const splittedValue = sites.orgId.split("0")[0];
+          let newSiteId;
+          if (splittedValue.length === 2) {
+            newSiteId = `0${sites?.orgId}`;
+          } else {
+            newSiteId = `00${sites?.orgId}`;
+          }
+
+          if (newSiteId) {
+            if (newSiteId === item?.id) {
+              filteredSites.push(item);
+            } else {
+              return;
+            }
+          }
+        });
+      });
+
+      setDisconnectedSites(filteredSites);
+      setTotalItems(filteredSites?.length);
+    }
+  };
+
+  //Disconnected Sites
   const [getBoxProperty, { data: siteInfo }] = useGetBoxPropertyMutation();
 
   useEffect(() => {
+    // Refetch Data
     const interval = setInterval(refetch, 10000);
-
-    // if (disconnectedSites.length !== (currentData || []).length) {
-    // if (disconnectedSites.length < (currentData || []).length) {
-    //   const audio = new Audio(warningAudio);
-    //   audio.play();
-    // }
-    setDisconnectedSites(currentData);
-    setTotalItems(currentData?.length);
-    // }
+    if (user?.role === 99 && user?.permission) {
+      handleAllowedSites();
+    } else {
+      setDisconnectedSites(currentData);
+      setTotalItems(currentData?.length);
+    }
 
     return () => {
       clearInterval(interval);
     };
-  }, [currentData, refetch]);
+  }, [currentData, refetch, user, currentData]);
 
   const dispatch = useAppDispatch();
   const rowKey = useAppSelector(getSelectedRowIds);
@@ -96,14 +133,12 @@ export const DisconnectedSitesTable: FC<Props> = ({
     let array = [];
     if (disconnectedSites) {
       array = disconnectedSites.filter(
-        (site: any) => site.connectionState == false,
+        (site: any) => site.connectionState == 0,
       );
-    } else {
-      array = currentData?.filter((site: any) => site.connectionState == false);
     }
     setTotalItems(array?.length);
     return array;
-  }, [disconnectedSites, currentData]);
+  }, [disconnectedSites, currentData, user]);
 
   return (
     <>
@@ -111,9 +146,7 @@ export const DisconnectedSitesTable: FC<Props> = ({
         rowKey="id"
         className={className}
         scroll={{ x: 1200 }}
-        // dataSource={event.find((item) => item.pageIndex === pageIndex)?.data}
         dataSource={data}
-        // headerBg={"#0000FF"}
         sticky={true}
         columns={columns}
         showSorterTooltip={false}
@@ -132,7 +165,7 @@ export const DisconnectedSitesTable: FC<Props> = ({
         data-testid={dataTestId}
       />
 
-      <SiteInfo refetch={refetch} sitesData={siteInfo} />
+      <SiteInfo refetch={refetch} sitesData={siteInfo} selectedSiteId="" />
     </>
   );
 };

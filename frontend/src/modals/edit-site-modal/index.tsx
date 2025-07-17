@@ -218,7 +218,6 @@ const EditSiteForm = ({
         dispatch(setShowSiteInfoModal(false));
       }
     } catch (error) {
-      console.log(error);
       messageApi.error("There was an error");
     }
   };
@@ -236,7 +235,6 @@ const EditSiteForm = ({
   };
 
   useEffect(() => {
-    console.log(siteData, "site data in useeefect");
     form.setFieldsValue(siteData);
   }, [siteData]);
 

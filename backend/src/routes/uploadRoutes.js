@@ -26,7 +26,7 @@ export const uploadRoutes = async (app) => {
     }
 
     // Access other fields from req.body
-    const { boxType, version, packageType } = req.body;
+    const { boxType, version, packageType, userId } = req.body;
 
     const uploadDirectory = path.resolve(__dirname, "../../uploads");
     if (!fs.existsSync(uploadDirectory)) {
@@ -63,7 +63,7 @@ export const uploadRoutes = async (app) => {
         parseInt(packageType.value), // packageType
         creationTimeUTC, // creation_time_UTC
         "27", // versionNum
-        "admin", // creator
+        `${userId.value}`, // creator
       ];
 
       // Execute the query

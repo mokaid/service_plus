@@ -12,7 +12,6 @@ import {
   clearAlarmRecordEvents,
   setAlarmRecordEvents,
   setGlobalPageSize,
-  setShowEventsFilterModal,
   setTotalAlarmRecord,
 } from "@/store/slices/events";
 
@@ -26,7 +25,6 @@ import {
 } from "@/utils/general-helpers";
 import { useAppSelector } from "@/hooks/use-app-selector";
 import {
-  getAlarmRecordEvents,
   getGlobalPageSize,
   getSelectedRowIds,
   getTotalAlarmRecords,

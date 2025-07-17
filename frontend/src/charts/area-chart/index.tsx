@@ -43,9 +43,10 @@ const formatTime = (seconds: number) => {
 
 const findWithLeastSeconds = (data: any) => {
   if (data.length > 0) {
-    return data.reduce((total: any, a: any) => {
-      return (total + a.seconds) / data.length;
+    const sum = data.reduce((total: any, a: any) => {
+      return total + a.seconds;
     }, 0);
+    return sum / data.length;
   } else {
     return 0;
   }
@@ -74,7 +75,7 @@ export const BaseAreaChart: FC<BasePieChartProps> = ({
         </Typography.Text>
       }
     >
-      {!isLoading && data?.length === 0 ? (
+      {!isLoading && (data || []).length === 0 ? (
         <div className={styles.loaderDiv}>
           <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />
         </div>

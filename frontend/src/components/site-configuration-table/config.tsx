@@ -70,7 +70,10 @@ const SitesActions: React.FC<ColumnParams> = ({
     dispatch(setGroupObject(record));
   };
 
-  if (record?.isSite) {
+  if (
+    // record?.isSite
+    record?.id?.split("").length > 3
+  ) {
     return (
       <Space size={2} split={<Divider type="vertical" />}>
         <Button size="small" onClick={() => editSite(record)}>
@@ -79,7 +82,10 @@ const SitesActions: React.FC<ColumnParams> = ({
         <DeleteSiteButton refetch={refetch} id={record.id} />
       </Space>
     );
-  } else if (record?.isGroup) {
+  } else if (
+    // record?.isGroup
+    record?.id?.split("").length === 2
+  ) {
     return (
       <Space>
         <PermissionGuard keyName="siteConfiguration" action="m">
@@ -87,7 +93,7 @@ const SitesActions: React.FC<ColumnParams> = ({
             Edit Group
           </Button>
         </PermissionGuard>
-        {!record?.children && (
+        {/* {!record?.children && (
           <PermissionGuard keyName="siteConfiguration" action="d">
             <Link
               onClick={() =>
@@ -101,7 +107,7 @@ const SitesActions: React.FC<ColumnParams> = ({
               Delete
             </Link>
           </PermissionGuard>
-        )}
+        )} */}
       </Space>
     );
   } else if (record?.isOrganisation) {
@@ -132,13 +138,19 @@ const SitesActions: React.FC<ColumnParams> = ({
 };
 
 const Icon: React.FC<{ record: TableRecord }> = ({ record }) => {
-  if (record?.isSite) {
+  if (
+    // record?.isSite
+    record?.id?.split("").length > 3
+  ) {
     return (
       <VideoCameraFilled
         style={{ color: record?.status ? "#49aa19" : "#dc4446" }}
       />
     );
-  } else if (record?.isGroup) {
+  } else if (
+    // record?.isGroup
+    record?.id?.split("").length === 2
+  ) {
     return <FolderFilled />;
   } else if (record?.isOrganisation) {
     return <HomeFilled />;

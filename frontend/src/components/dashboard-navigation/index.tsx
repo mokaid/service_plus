@@ -9,7 +9,7 @@ import {
   UserOutlined,
 } from "@ant-design/icons";
 import { ConfigProvider, Spin, type ThemeConfig } from "antd";
-import type { FC } from "react";
+import { useEffect, useMemo, useState, type FC } from "react";
 
 import { useAppSelector } from "@/hooks/use-app-selector";
 import { AlarmRoute, AppRoute } from "@/routes/routes";
@@ -112,13 +112,25 @@ export const DashboardNavigation: FC<Props> = ({
   dataTestId = "dashboard-navigation",
 }) => {
   const user = useAppSelector((state) => state.authState.user as User);
-  const filteredItems = user?.permission
-    ? [...getFilteredNavItems(user, navItems)]
-    : user?.permission === undefined
-    ? [...getFilteredNavItems(user, navItems), ...AdminNagivation]
-    : [];
+  const [loading, setLoading] = useState(true);
 
-  if (!user?.permission && user?.role != 0) {
+  const filteredItems = useMemo(() => {
+    let items: any = [];
+    if (!user?.sysRole) {
+      return [];
+    }
+    if (user?.permission) {
+      items = [...getFilteredNavItems(user, navItems)];
+    } else if (user?.permission === undefined) {
+      items = [...getFilteredNavItems(user, navItems), ...AdminNagivation];
+    } else {
+      items = [];
+    }
+    setLoading(false);
+    return items;
+  }, [user]);
+
+  if (loading) {
     return <Spin style={{ width: "100%", marginTop: 32 }} />;
   }
 

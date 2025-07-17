@@ -1,16 +1,18 @@
 .container {
-  /* width:"100%", border:"1px solid white",minHeight:"100vh",backgroundColor:"rgba(5, 10, 25, 1)" */
+
   width: 100%;
   min-height: 100vh;
   background-color: rgba(5, 10, 25, 1);
   position: relative;
 }
+
 .login_card_container {
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 100vh;
 }
+
 .login_card {
   width: 400px;
   border-radius: 16px;
@@ -21,11 +23,15 @@
   align-items: center;
   z-index: 2;
 }
+
 .logo {
   height: 32px;
   width: 166px;
   margin-bottom: 24px;
+
 }
+
+
 .img {
   /* width:"150px",height:"158px" */
   height: 158px;
@@ -39,9 +45,11 @@
   border: 1px solid rgba(100, 103, 113, 1);
   margin-bottom: 24px;
 }
-.input_bg > input {
+
+.input_bg>input {
   background-color: transparent !important;
 }
+
 .primary_btn {
   border-radius: 2px !important;
   width: 100%;
@@ -50,6 +58,7 @@
 .input_container {
   width: 100%;
 }
+
 .bg_img {
   z-index: 1;
   position: absolute;
