@@ -1,9 +1,20 @@
+import { useState, useEffect } from "react";
 import { formatDateHeader } from "@/utils/general-helpers";
 
 const DateTime = () => {
-  const inputDate = new Date();
+  const [currentTime, setCurrentTime] = useState(new Date());
 
-  var days = [
+  useEffect(() => {
+    // Update time every second
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+
+    // Cleanup interval on component unmount
+    return () => clearInterval(timer);
+  }, []);
+
+  const days = [
     "Sunday",
     "Monday",
     "Tuesday",
@@ -12,13 +23,14 @@ const DateTime = () => {
     "Friday",
     "Saturday",
   ];
+
   return (
     <>
-      {formatDateHeader(inputDate)}
+      {formatDateHeader(currentTime)}
       {", "}
-      {days[inputDate.getDay()]}
+      {days[currentTime.getDay()]}
       {", "}
-      {inputDate.toLocaleString("en-US", {
+      {currentTime.toLocaleString("en-US", {
         hour: "2-digit",
         minute: "2-digit",
         second: "2-digit",
