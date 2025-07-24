@@ -235,7 +235,7 @@ export const AlertsMap: FC<Props> = ({
 
   const selectedSites = useMemo(() => {
     let sitesArray: any[] = [];
-    const filterSites = top10WeeklyAlertsbySite.forEach((item: any) => {
+    const filterSites = top10WeeklyAlertsbySite?.forEach((item: any) => {
       const splitted = item?.name.split(" ")[0];
       filters?.sites?.forEach((site: any) => {
         if (site === splitted) {
